@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弈 · 围棋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;500;700;900&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #15110c;
+  --bg-mid: #241914;
+  --paper: #f4e8d0;
+  --paper-dark: #d8c8a8;
+  --board-light: #e8c088;
+  --board: #d4a76a;
+  --board-dark: #a88040;
+  --line: #2a1810;
+  --accent: #c8392c;
+  --accent-light: #e85d4a;
+  --gold: #d4a960;
+  --text-light: #f4e8d0;
+  --text-muted: #a89070;
+  --text-dim: #6a5848;
+  --glass: rgba(244, 232, 208, 0.04);
+  --glass-strong: rgba(244, 232, 208, 0.08);
+  --glass-border: rgba(244, 232, 208, 0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Serif SC', serif;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(200, 160, 80, 0.14), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 100%, rgba(200, 57, 44, 0.1), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 10% 80%, rgba(200, 160, 80, 0.06), transparent 60%),
+    linear-gradient(135deg, #15110c 0%, #241914 50%, #15110c 100%);
+  background-attachment: fixed;
+  color: var(--text-light);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(212, 169, 96, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(212, 169, 96, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(200, 57, 44, 0.025) 1px, transparent 1px);
+  background-size: 60px 60px, 90px 90px, 120px 120px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px 36px 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.title-block {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #d4452f, #a8281c);
+  color: var(--paper);
+  font-family: 'Ma Shan Zheng', serif;
+  font-size: 42px;
+  border-radius: 6px;
+  box-shadow:
+    0 6px 16px rgba(200, 57, 44, 0.45),
+    inset 0 0 0 2px rgba(244, 232, 208, 0.22),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.2);
+  transform: rotate(-3deg);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.seal::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(244, 232, 208, 0.35);
+  border-radius: 3px;
+}
+
+.title-text h1 {
+  font-family: 'ZCOOL XiaoWei', serif;
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: 6px;
+  color: var(--text-light);
+  line-height: 1;
+}
+
+.title-text p {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 3px;
+  margin-top: 6px;
+}
+
+.size-switch {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+}
+
+.size-switch button {
+  padding: 9px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: all 0.25s;
+  letter-spacing: 2px;
+}
+
+.size-switch button:hover {
+  color: var(--text-light);
+}
+
+.size-switch button.active {
+  background: linear-gradient(135deg, var(--accent), #a8281c);
+  color: var(--paper);
+  box-shadow: 0 3px 10px rgba(200, 57, 44, 0.35);
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  flex: 1;
+  align-items: start;
+}
+
+.board-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.board-container {
+  position: relative;
+  padding: 18px;
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(139, 90, 43, 0.15), rgba(0, 0, 0, 0.2));
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(212, 169, 96, 0.2);
+}
+
+.board-container::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(212, 169, 96, 0.18);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+#board {
+  display: block;
+  border-radius: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.hint kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.players {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.player-card.active {
+  background: var(--glass-strong);
+  border-color: rgba(212, 169, 96, 0.3);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+.player-card.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent), var(--gold));
+}
+
+.stone-display {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.player-card.active .stone-display {
+  transform: scale(1.06);
+}
+
+.stone-display.black {
+  background: radial-gradient(circle at 32% 30%, #6a6a6a, #1a1a1a 55%, #000);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.stone-display.white {
+  background: radial-gradient(circle at 32% 30%, #ffffff, #f0e8d8 55%, #b8b0a0);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.player-info { flex: 1; }
+.player-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-light);
+  letter-spacing: 2px;
+}
+.player-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+.player-meta span {
+  color: var(--gold);
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.info-card {
+  padding: 14px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.info-row + .info-row {
+  border-top: 1px solid var(--glass-border);
+}
+
+.info-row .label {
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.info-row .value {
+  color: var(--text-light);
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.info-row .value.accent {
+  color: var(--accent-light);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn {
+  padding: 11px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 3px;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--glass-strong);
+  border-color: rgba(212, 169, 96, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent), #a8281c);
+  border-color: var(--accent);
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--accent-light), var(--accent));
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.history-card {
+  flex: 1;
+  padding: 14px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.block-title {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 4px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 4px;
+}
+
+.history-list::-webkit-scrollbar { width: 4px; }
+.history-list::-webkit-scrollbar-track { background: transparent; }
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 2px;
+}
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 232, 208, 0.2);
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.history-item:hover {
+  background: var(--glass);
+}
+
+.history-item .num {
+  color: var(--text-dim);
+  min-width: 30px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-item .stone-mini {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stone-mini.black {
+  background: radial-gradient(circle at 35% 35%, #555, #000);
+}
+
+.stone-mini.white {
+  background: radial-gradient(circle at 35% 35%, #fff, #b8b0a0);
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.3);
+}
+
+.history-item .coord {
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+}
+
+.history-item .cap {
+  color: var(--accent-light);
+  font-size: 11px;
+  margin-left: auto;
+}
+
+.empty-history {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  padding: 24px 0;
+  font-style: italic;
+  letter-spacing: 2px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(20, 12, 8, 0.95);
+  border: 1px solid var(--glass-border);
+  color: var(--text-light);
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 100;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 1024px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+  .app {
+    padding: 20px;
+  }
+  .sidebar {
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .title-text h1 {
+    font-size: 26px;
+  }
+  .app {
+    padding: 16px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <div class="title-block">
+      <div class="seal">弈</div>
+      <div class="title-text">
+        <h1>围棋</h1>
+        <p>一子落 · 满盘皆活</p>
+      </div>
+    </div>
+    <div class="size-switch">
+      <button data-size="9">9 路</button>
+      <button data-size="13">13 路</button>
+      <button data-size="19" class="active">19 路</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="board-wrap">
+      <div class="board-container">
+        <canvas id="board" width="720" height="720"></canvas>
+      </div>
+      <div class="hint">
+        <span><kbd>Z</kbd>悔棋</span>
+        <span><kbd>P</kbd>虚着</span>
+        <span><kbd>C</kbd>数目</span>
+        <span><kbd>R</kbd>新局</span>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="players">
+        <div class="player-card active" id="player-black">
+          <div class="stone-display black"></div>
+          <div class="player-info">
+            <div class="player-name">执 黑</div>
+            <div class="player-meta">提子<span id="captures-black">0</span></div>
+          </div>
+        </div>
+        <div class="player-card" id="player-white">
+          <div class="stone-display white"></div>
+          <div class="player-info">
+            <div class="player-name">执 白</div>
+            <div class="player-meta">提子<span id="captures-white">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <span class="label">手 数</span>
+          <span class="value" id="move-count">0</span>
+        </div>
+        <div class="info-row">
+          <span class="label">轮 到</span>
+          <span class="value" id="current-turn">黑方</span>
+        </div>
+        <div class="info-row" id="score-row" style="display:none;">
+          <span class="label">形 势</span>
+          <span class="value accent" id="score-text">—</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="btn-undo">悔 棋</button>
+        <button class="btn" id="btn-pass">虚 着</button>
+        <button class="btn" id="btn-count">数 目</button>
+        <button class="btn primary" id="btn-reset">新 局</button>
+      </div>
+
+      <div class="history-card">
+        <div class="block-title">棋 谱</div>
+        <div class="history-list" id="history-list">
+          <div class="empty-history">尚 未 落 子</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ 状态 ============
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+
+let SIZE = 19;
+let displaySize = 720;
+let board = [];
+let history = [];
+let captures = { 1: 0, 2: 0 };
+let currentPlayer = 1;
+let lastMove = null;
+let koPoint = null;
+let moveCount = 0;
+let hoverPos = null;
+let countingMode = false;
+let territoryMap = null;
+let stoneAnimations = [];
+let animFrameId = null;
+
+const STAR_POINTS = {
+  9:  [[2,2],[2,6],[6,2],[6,6],[4,4]],
+  13: [[3,3],[3,9],[9,3],[9,9],[6,6]],
+  19: [[3,3],[3,9],[3,15],[9,3],[9,9],[9,15],[15,3],[15,9],[15,15]]
+};
+const COLS = 'ABCDEFGHJKLMNOPQRST';
+
+// ============ 初始化 ============
+function initGame(size) {
+  SIZE = size;
+  board = Array.from({ length: size }, () => Array(size).fill(0));
+  history = [];
+  captures = { 1: 0, 2: 0 };
+  currentPlayer = 1;
+  lastMove = null;
+  koPoint = null;
+  moveCount = 0;
+  hoverPos = null;
+  countingMode = false;
+  territoryMap = null;
+  stoneAnimations = [];
+  if (animFrameId) {
+    cancelAnimationFrame(animFrameId);
+    animFrameId = null;
+  }
+  document.getElementById('score-row').style.display = 'none';
+  resizeCanvas();
+  draw();
+  updateUI();
+  updateHistory();
+}
+
+function resizeCanvas() {
+  const wrap = document.querySelector('.board-wrap');
+  const rect = wrap.getBoundingClientRect();
+  let size = Math.min(rect.width || 720, window.innerHeight - 200, 720);
+  size = Math.max(360, Math.floor(size));
+  displaySize = size;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function getMetrics() {
+  const padding = displaySize * 0.06;
+  const cellSize = (displaySize - padding * 2) / (SIZE - 1);
+  return { padding, cellSize };
+}
+
+function gridToPixel(x, y) {
+  const { padding, cellSize } = getMetrics();
+  return { px: padding + x * cellSize, py: padding + y * cellSize };
+}
+
+function pixelToGrid(px, py) {
+  const { padding, cellSize } = getMetrics();
+  const x = Math.round((px - padding) / cellSize);
+  const y = Math.round((py - padding) / cellSize);
+  if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return null;
+  const ex = padding + x * cellSize;
+  const ey = padding + y * cellSize;
+  if (Math.hypot(px - ex, py - ey) > cellSize * 0.5) return null;
+  return { x, y };
+}
+
+// ============ 规则 ============
+function getGroup(b, x, y) {
+  const color = b[y][x];
+  if (color === 0) return [];
+  const group = [];
+  const visited = new Set();
+  const stack = [[x, y]];
+  while (stack.length) {
+    const [cx, cy] = stack.pop();
+    const key = `${cx},${cy}`;
+    if (visited.has(key) || b[cy][cx] !== color) continue;
+    visited.add(key);
+    group.push([cx, cy]);
+    for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = cx + dx, ny = cy + dy;
+      if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && !visited.has(`${nx},${ny}`)) {
+        stack.push([nx, ny]);
+      }
+    }
+  }
+  return group;
+}
+
+function getLiberties(b, group) {
+  const libs = new Set();
+  for (const [x, y] of group) {
+    for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && b[ny][nx] === 0) {
+        libs.add(`${nx},${ny}`);
+      }
+    }
+  }
+  return libs.size;
+}
+
+function tryPlay(x, y) {
+  if (countingMode) {
+    showToast('数目模式中，请先关闭');
+    return false;
+  }
+  if (board[y][x] !== 0) { showToast('此处已有棋子'); return false; }
+  if (koPoint && koPoint.x === x && koPoint.y === y) { showToast('劫争禁着'); return false; }
+
+  const newBoard = board.map(r => [...r]);
+  newBoard[y][x] = currentPlayer;
+  const opponent = currentPlayer === 1 ? 2 : 1;
+  const captured = [];
+  const checked = new Set();
+
+  for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+    const nx = x + dx, ny = y + dy;
+    if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE) continue;
+    if (newBoard[ny][nx] !== opponent || checked.has(`${nx},${ny}`)) continue;
+    const group = getGroup(newBoard, nx, ny);
+    group.forEach(([gx, gy]) => checked.add(`${gx},${gy}`));
+    if (getLiberties(newBoard, group) === 0) {
+      for (const [gx, gy] of group) {
+        newBoard[gy][gx] = 0;
+        captured.push([gx, gy]);
+      }
+    }
+  }
+
+  const myGroup = getGroup(newBoard, x, y);
+  if (getLiberties(newBoard, myGroup) === 0) {
+    showToast('禁着自杀');
+    return false;
+  }
+
+  let newKo = null;
+  if (captured.length === 1 && myGroup.length === 1) {
+    newKo = { x: captured[0][0], y: captured[0][1] };
+  }
+
+  history.push({
+    x, y, player: currentPlayer,
+    capturedCount: captured.length,
+    pass: false,
+    prevBoard: board.map(r => [...r]),
+    prevCaptures: { ...captures },
+    prevKoPoint: koPoint,
+    prevMoveCount: moveCount,
+    prevLastMove: lastMove
+  });
+
+  board = newBoard;
+  captures[currentPlayer] += captured.length;
+  koPoint = newKo;
+  const placedColor = currentPlayer;
+  lastMove = { x, y, player: currentPlayer };
+  currentPlayer = opponent;
+  moveCount++;
+  countingMode = false;
+  territoryMap = null;
+
+  stoneAnimations.push({ x, y, t: 0, type: 'place', color: placedColor });
+  for (const [cx, cy] of captured) {
+    stoneAnimations.push({ x: cx, y: cy, t: 0, type: 'capture', color: opponent });
+  }
+
+  draw();
+  updateUI();
+  updateHistory();
+  startAnimation();
+  return true;
+}
+
+function undo() {
+  if (history.length === 0) { showToast('无棋可悔'); return; }
+  const last = history.pop();
+  board = last.prevBoard;
+  captures = last.prevCaptures;
+  koPoint = last.prevKoPoint;
+  moveCount = last.prevMoveCount;
+  lastMove = last.prevLastMove;
+  currentPlayer = last.player;
+  countingMode = false;
+  territoryMap = null;
+  stoneAnimations = [];
+  if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+  document.getElementById('score-row').style.display = 'none';
+  draw();
+  updateUI();
+  updateHistory();
+}
+
+function pass() {
+  history.push({
+    pass: true,
+    player: currentPlayer,
+    prevBoard: board.map(r => [...r]),
+    prevCaptures: { ...captures },
+    prevKoPoint: koPoint,
+    prevMoveCount: moveCount,
+    prevLastMove: lastMove
+  });
+  const who = currentPlayer === 1 ? '黑方' : '白方';
+  lastMove = { pass: true, player: currentPlayer };
+  currentPlayer = currentPlayer === 1 ? 2 : 1;
+  koPoint = null;
+  moveCount++;
+  countingMode = false;
+  territoryMap = null;
+  showToast(who + ' 虚着');
+  draw();
+  updateUI();
+  updateHistory();
+}
+
+function countTerritory() {
+  const visited = new Set();
+  const territory = { 1: [], 2: [], neutral: [] };
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      if (board[y][x] !== 0 || visited.has(`${x},${y}`)) continue;
+      const region = [];
+      const borderColors = new Set();
+      const stack = [[x, y]];
+      while (stack.length) {
+        const [cx, cy] = stack.pop();
+        const k = `${cx},${cy}`;
+        if (visited.has(k)) continue;
+        visited.add(k);
+        region.push([cx, cy]);
+        for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+          const nx = cx + dx, ny = cy + dy;
+          if (nx < 0 || nx >= SIZE || ny < 0 || ny >= SIZE) continue;
+          if (board[ny][nx] === 0) {
+            if (!visited.has(`${nx},${ny}`)) stack.push([nx, ny]);
+          } else {
+            borderColors.add(board[ny][nx]);
+          }
+        }
+      }
+      if (borderColors.size === 1) territory[[...borderColors][0]].push(...region);
+      else territory.neutral.push(...region);
+    }
+  }
+  return territory;
+}
+
+function toggleCount() {
+  countingMode = !countingMode;
+  if (countingMode) {
+    territoryMap = countTerritory();
+    const blackScore = territoryMap[1].length + captures[1];
+    const whiteScore = territoryMap[2].length + captures[2] + 6.5;
+    const diff = blackScore - whiteScore;
+    document.getElementById('score-row').style.display = 'flex';
+    document.getElementById('score-text').textContent =
+      diff > 0 ? `黑 +${diff.toFixed(1)}` : diff < 0 ? `白 +${(-diff).toFixed(1)}` : '均势';
+    showToast(`黑 ${blackScore} 目 · 白 ${whiteScore.toFixed(1)} 目`);
+  } else {
+    territoryMap = null;
+    document.getElementById('score-row').style.display = 'none';
+  }
+  draw();
+  updateUI();
+}
+
+// ============ 绘制 ============
+function draw() {
+  const W = displaySize;
+  const { padding, cellSize } = getMetrics();
+  ctx.clearRect(0, 0, W, W);
+
+  // 木质背景
+  const bgGrad = ctx.createRadialGradient(W * 0.3, W * 0.2, 0, W * 0.5, W * 0.5, W * 0.9);
+  bgGrad.addColorStop(0, '#e8c088');
+  bgGrad.addColorStop(0.5, '#d4a76a');
+  bgGrad.addColorStop(1, '#a88040');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, W);
+
+  // 木纹
+  ctx.save();
+  ctx.globalAlpha = 0.09;
+  for (let i = 0; i < 38; i++) {
+    ctx.strokeStyle = i % 2 === 0 ? '#8b5a2b' : '#6b4a20';
+    ctx.lineWidth = 0.4 + (i % 3) * 0.25;
+    ctx.beginPath();
+    const y = (W / 38) * i + (i % 2 ? 1 : 0);
+    ctx.moveTo(0, y);
+    ctx.bezierCurveTo(
+      W * 0.3, y + Math.sin(i * 1.3) * 4,
+      W * 0.7, y + Math.cos(i * 0.9) * 4,
+      W, y
+    );
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // 网格
+  ctx.strokeStyle = '#2a1810';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i < SIZE; i++) {
+    const p = padding + i * cellSize;
+    ctx.moveTo(padding, p);
+    ctx.lineTo(W - padding, p);
+    ctx.moveTo(p, padding);
+    ctx.lineTo(p, W - padding);
+  }
+  ctx.stroke();
+  ctx.lineWidth = 1.8;
+  ctx.strokeRect(padding, padding, W - padding * 2, W - padding * 2);
+
+  // 星位
+  const stars = STAR_POINTS[SIZE] || [];
+  ctx.fillStyle = '#2a1810';
+  for (const [sx, sy] of stars) {
+    const { px, py } = gridToPixel(sx, sy);
+    ctx.beginPath();
+    ctx.arc(px, py, Math.max(2.5, cellSize * 0.1), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 坐标
+  ctx.fillStyle = 'rgba(58, 36, 16, 0.55)';
+  ctx.font = `${Math.max(9, cellSize * 0.3)}px 'Noto Serif SC', serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < SIZE; i++) {
+    const p = padding + i * cellSize;
+    ctx.fillText(COLS[i], p, padding * 0.5);
+    ctx.fillText(COLS[i], p, W - padding * 0.5);
+    ctx.fillText(String(SIZE - i), padding * 0.5, p);
+    ctx.fillText(String(SIZE - i), W - padding * 0.5, p);
+  }
+
+  // 地盘标记
+  if (countingMode && territoryMap) {
+    for (const [x, y] of territoryMap[1]) {
+      const { px, py } = gridToPixel(x, y);
+      ctx.fillStyle = 'rgba(20, 20, 20, 0.45)';
+      ctx.fillRect(px - cellSize * 0.18, py - cellSize * 0.18, cellSize * 0.36, cellSize * 0.36);
+    }
+    for (const [x, y] of territoryMap[2]) {
+      const { px, py } = gridToPixel(x, y);
+      ctx.fillStyle = 'rgba(250, 245, 235, 0.7)';
+      ctx.fillRect(px - cellSize * 0.18, py - cellSize * 0.18, cellSize * 0.36, cellSize * 0.36);
+    }
+  }
+
+  // 棋子
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      if (board[y][x] !== 0) {
+        const anim = stoneAnimations.find(a => a.x === x && a.y === y && a.type === 'place');
+        if (anim) continue;
+        drawStone(x, y, board[y][x], 1, 1);
+      }
+    }
+  }
+
+  // 动画
+  for (const anim of stoneAnimations) {
+    if (anim.type === 'capture') {
+      const scale = 1 - anim.t * 0.4;
+      const alpha = 1 - anim.t;
+      drawStone(anim.x, anim.y, anim.color, alpha, Math.max(0.01, scale));
+    } else if (anim.type === 'place') {
+      const scale = 0.55 + anim.t * 0.45;
+      const alpha = Math.min(1, anim.t * 2);
+      drawStone(anim.x, anim.y, anim.color, alpha, scale);
+    }
+  }
+
+  // 最后一手
+  if (lastMove && !lastMove.pass) {
+    const anim = stoneAnimations.find(a => a.x === lastMove.x && a.y === lastMove.y && a.type === 'place');
+    if (!anim || anim.t > 0.6) {
+      const { px, py } = gridToPixel(lastMove.x, lastMove.y);
+      ctx.fillStyle = '#c8392c';
+      ctx.beginPath();
+      ctx.arc(px, py, cellSize * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 220, 200, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  // 劫争点
+  if (koPoint) {
+    const { px, py } = gridToPixel(koPoint.x, koPoint.y);
+    ctx.strokeStyle = '#c8392c';
+    ctx.lineWidth = 2;
+    const r = cellSize * 0.2;
+    ctx.beginPath();
+    ctx.moveTo(px - r, py - r);
+    ctx.lineTo(px + r, py + r);
+    ctx.moveTo(px + r, py - r);
+    ctx.lineTo(px - r, py + r);
+    ctx.stroke();
+  }
+
+  // 悬停
+  if (hoverPos && !countingMode && board[hoverPos.y][hoverPos.x] === 0) {
+    if (!koPoint || koPoint.x !== hoverPos.x || koPoint.y !== hoverPos.y) {
+      drawStone(hoverPos.x, hoverPos.y, currentPlayer, 0.42, 1);
+    }
+  }
+}
+
+function drawStone(x, y, color, alpha, scale) {
+  const { cellSize } = getMetrics();
+  const { px, py } = gridToPixel(x, y);
+  const r = Math.max(1, cellSize * 0.46 * scale);
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  // 阴影
+  ctx.beginPath();
+  ctx.arc(px + 1.5, py + 2.5, r, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.fill();
+
+  // 主体
+  const grad = ctx.createRadialGradient(
+    px - r * 0.35, py - r * 0.35, Math.max(0.1, r * 0.05),
+    px, py, Math.max(0.5, r)
+  );
+  if (color === 1) {
+    grad.addColorStop(0, '#6a6a6a');
+    grad.addColorStop(0.3, '#2a2a2a');
+    grad.addColorStop(0.7, '#111111');
+    grad.addColorStop(1, '#000000');
+  } else {
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.5, '#f5f0e6');
+    grad.addColorStop(0.85, '#d6cdb8');
+    grad.addColorStop(1, '#a8a090');
+  }
+  ctx.beginPath();
+  ctx.arc(px, py, r, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 高光
+  const hg = ctx.createRadialGradient(
+    px - r * 0.32, py - r * 0.32, 0,
+    px - r * 0.32, py - r * 0.32, Math.max(0.5, r * 0.6)
+  );
+  if (color === 1) {
+    hg.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
+    hg.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  } else {
+    hg.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
+    hg.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  }
+  ctx.fillStyle = hg;
+  ctx.beginPath();
+  ctx.arc(px, py, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 暗边
+  if (color === 2) {
+    ctx.strokeStyle = 'rgba(80, 70, 50, 0.18)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(px, py, r - 0.4, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+// ============ 动画 ============
+function startAnimation() {
+  if (animFrameId) return;
+  animFrameId = requestAnimationFrame(animate);
+}
+
+function animate() {
+  let alive = false;
+  for (const a of stoneAnimations) {
+    a.t += 0.085;
+    if (a.t < 1) alive = true;
+  }
+  stoneAnimations = stoneAnimations.filter(a => a.t < 1);
+  draw();
+  if (alive || stoneAnimations.length > 0) {
+    animFrameId = requestAnimationFrame(animate);
+  } else {
+    animFrameId = null;
+  }
+}
+
+// ============ 事件 ============
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX - rect.left) * (displaySize / rect.width);
+  const py = (e.clientY - rect.top) * (displaySize / rect.height);
+  const pos = pixelToGrid(px, py);
+  if (pos && (!hoverPos || hoverPos.x !== pos.x || hoverPos.y !== pos.y)) {
+    hoverPos = pos;
+    if (!animFrameId) draw();
+  } else if (!pos && hoverPos) {
+    hoverPos = null;
+    if (!animFrameId) draw();
+  }
+});
+
+canvas.addEventListener('mouseleave', () => {
+  hoverPos = null;
+  if (!animFrameId) draw();
+});
+
+canvas.addEventListener('click', (e) => {
+  if (countingMode) return;
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX - rect.left) * (displaySize / rect.width);
+  const py = (e.clientY - rect.top) * (displaySize / rect.height);
+  const pos = pixelToGrid(px, py);
+  if (pos) tryPlay(pos.x, pos.y);
+});
+
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (countingMode) return;
+  const t = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const px = (t.clientX - rect.left) * (displaySize / rect.width);
+  const py = (t.clientY - rect.top) * (displaySize / rect.height);
+  const pos = pixelToGrid(px, py);
+  if (pos) tryPlay(pos.x, pos.y);
+}, { passive: false });
+
+document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-pass').addEventListener('click', pass);
+document.getElementById('btn-count').addEventListener('click', toggleCount);
+document.getElementById('btn-reset').addEventListener('click', () => initGame(SIZE));
+
+document.querySelectorAll('.size-switch button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.size-switch button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    initGame(parseInt(btn.dataset.size));
+  });
+});
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  draw();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  switch (e.key.toLowerCase()) {
+    case 'z': undo(); break;
+    case 'p': pass(); break;
+    case 'c': toggleCount(); break;
+    case 'r': initGame(SIZE); break;
+  }
+});
+
+// ============ UI 更新 ============
+function updateUI() {
+  document.getElementById('move-count').textContent = moveCount;
+  document.getElementById('current-turn').textContent = currentPlayer === 1 ? '黑方' : '白方';
+  document.getElementById('captures-black').textContent = captures[1];
+  document.getElementById('captures-white').textContent = captures[2];
+  document.getElementById('player-black').classList.toggle('active', currentPlayer === 1);
+  document.getElementById('player-white').classList.toggle('active', currentPlayer === 2);
+  document.getElementById('btn-undo').disabled = history.length === 0;
+  document.getElementById('btn-count').textContent = countingMode ? '续 弈' : '数 目';
+}
+
+function updateHistory() {
+  const list = document.getElementById('history-list');
+  if (history.length === 0) {
+    list.innerHTML = '<div class="empty-history">尚 未 落 子</div>';
+    return;
+  }
+  list.innerHTML = '';
+  history.forEach((m, i) => {
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    const coord = m.pass ? '虚 着' : `${COLS[m.x]}${SIZE - m.y}`;
+    const stoneClass = m.player === 1 ? 'black' : 'white';
+    const cap = m.capturedCount > 0 ? `<span class="cap">提 ${m.capturedCount}</span>` : '';
+    item.innerHTML = `
+      <span class="num">${String(i + 1).padStart(2, '0')}</span>
+      <div class="stone-mini ${stoneClass}"></div>
+      <span class="coord">${coord}</span>
+      ${cap}
+    `;
+    list.appendChild(item);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+// ============ Toast ============
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+// ============ 启动 ============
+initGame(19);
+</script>
+
+</body>
+</html>

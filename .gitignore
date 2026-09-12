@@ -7,5 +7,12 @@ node_modules/
 .dev-backup/
 .workbuddy/
 
+# 其他项目文件（本仓库只追踪方块生存；这些仅供本地使用）
+围棋.html
+植物大战僵尸.html
+_rebuild_menu.py
+对话总结-TraeWork上下文压缩.md
+方块生存-9月1日旧版备份.html
+
 # 可选的本地截图等临时产物
 *.log

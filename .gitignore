@@ -1,2 +1,11 @@
+# node_modules / Playwright 浏览器二进制（几百 MB，不该入库）
+node_modules/
+.dev-test/node_modules/
+.dev-test/browsers/
+
+# 本地工作辅助目录
 .dev-backup/
 .workbuddy/
+
+# 可选的本地截图等临时产物
+*.log

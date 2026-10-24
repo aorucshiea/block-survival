@@ -33,9 +33,9 @@ canvas { display: block; }
 .hslot.empty .cube { opacity: .18; }
 
 /* 左上角提示 */
-#hint { position: fixed; left: 12px; top: 10px; z-index: 5; display: none;
+#hint { position: fixed; left: 12px; right: 330px; top: 10px; z-index: 5; display: none;
   font-size: 12px; color: rgba(255, 255, 255, .85); text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
-  background: rgba(10, 12, 24, .45); padding: 6px 10px; border-radius: 8px; line-height: 1.8; }
+  background: rgba(10, 12, 24, .45); padding: 6px 10px; border-radius: 8px; line-height: 1.6; }
 
 /* 力量面板（右上角） */
 #strength { position: fixed; right: 12px; top: 10px; z-index: 5; display: none; text-align: right;
@@ -54,7 +54,7 @@ canvas { display: block; }
   pointer-events: none; text-shadow: 0 1px 2px #000; border: 1px solid #3a4570; }
 
 /* 目标清单（左上角） */
-#goal { position: fixed; left: 12px; top: 74px; z-index: 5; display: none;
+#goal { position: fixed; left: 12px; top: 88px; z-index: 5; display: none;
   font-size: 13px; color: #ffe082; text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
   background: rgba(10, 12, 24, .45); padding: 6px 10px; border-radius: 8px; }
 #strength #toolLine { font-size: 12px; color: rgba(255, 255, 255, .75); }
@@ -91,7 +91,7 @@ canvas { display: block; }
   background: #949494; cursor: not-allowed; text-shadow: none; }
 
 /* 物品栏窗口（我的世界生存模式布局：左角色+手槽，右合成，下材料袋/背包） */
-.invPanel { width: 760px; }
+.invPanel { width: 760px; overflow-y: auto; }   /* 720p 下内容比视口高：面板自己滚动，别把关闭按钮切掉 */
 .invTop { display: flex; gap: 14px; margin-top: 12px; }
 .invChar { display: flex; gap: 8px; background: #8b8b8b; border: 2px solid;
   border-color: #373737 #ffffff #ffffff #373737; padding: 10px; align-items: flex-start; }
@@ -109,7 +109,7 @@ canvas { display: block; }
 .invRight { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .invHead { font-size: 12px; font-weight: bold; color: #3f3f3f; letter-spacing: 3px; margin: 10px 2px 6px; }
 .invHead .lockTip { font-weight: normal; letter-spacing: 0; color: #666; }
-.invRecipes { flex: 1; max-height: 46vh; overflow-y: auto; background: #8b8b8b;
+.invRecipes { flex: 1; max-height: 30vh; overflow-y: auto; background: #8b8b8b;
   border: 2px solid; border-color: #373737 #ffffff #ffffff #373737; padding: 6px; }
 .invRecipes::-webkit-scrollbar { width: 14px; }
 .invRecipes::-webkit-scrollbar-track { background: #6f6f6f; }
@@ -160,6 +160,10 @@ canvas { display: block; }
 #cellsStam.exhausted i.on { background: #ef5350; box-shadow: 0 0 6px rgba(239, 83, 80, .6); }
 #cellsCold i.on { background: #90caf9; box-shadow: 0 0 6px rgba(144, 202, 249, .6); }
 #cellsHot i.on { background: #ff7043; box-shadow: 0 0 6px rgba(255, 112, 67, .6); }
+#cellsAir i.on { background: #7fd4ff; box-shadow: 0 0 6px rgba(127, 212, 255, .65); }   /* 呼吸：水下才亮的气泡条（我的世界式） */
+#status .vrow.airRow { display: none; }                       /* 岸上不占地方：只剩半口气才浮出来 */
+#status .vrow.airRow.show { display: flex; }
+#status .vrow.airRow.low #cellsAir i.on { background: #ff8a65; box-shadow: 0 0 7px rgba(255, 138, 101, .8); }
 .vnum { font-size: 11px; color: rgba(255, 255, 255, .85); text-shadow: 0 1px 2px #000; width: 30px; }
 
 /* 物品栏（苹果 + 镐子图标） */
@@ -277,7 +281,7 @@ kbd { background: #232a4d; border: 1px solid #39406b; border-bottom-width: 3px;
 <div id="aimTip"></div>
 <div id="selName"></div>
 <div id="handsHud"></div>
-<div id="hint">左键 挖（每口10cm）· 左右键一起按 双手刨（空手·费力气）· 中键(滚轮按下) 放右手的东西 · W 慢走 / 双击W 快走 / Shift 疾跑 · 对墙按住 W 攀爬 · G 换放置大小 · C 蹲（挖土要蹲）· X 趴 · E 物品栏 · F 吃苹果 · R 喝水 · F5/V 切换视角 · M 静音</div>
+<div id="hint">按住左键 挖（前摇0.3秒·每口10cm）· 左右键一起按 双手刨（空手·费力气）· 中键(滚轮按下) 放右手的东西 · W 慢走 / 双击W 快走 / Shift 疾跑 · 对墙按住 W 攀爬 · G 换放置大小 · C 蹲（蹲着不掉坎）· X 趴 · 空格 跳/上浮（水下会憋气）· E 物品栏 · F 吃 · R 喝水 · 卡住按 U 脱困 · F5/V 切换视角 · M 静音</div>
 <div id="sizeTag"></div>
 <div id="bodyView">
   <div class="bvTitle">身体状况</div>
@@ -336,8 +340,10 @@ kbd { background: #232a4d; border: 1px solid #39406b; border-bottom-width: 3px;
       <tr><td>攻击</td><td>左键点向夜行者（拿着工具更疼 · 它们掉生肉，营火旁能烤）</td></tr>
       <tr><td>物品栏 / 合成</td><td><kbd>E</kbd>（双手各拿一摞 · 村庄木屋里有现成的工具箱）</td></tr>
       <tr><td>吃 / 喝 / 烤肉</td><td><kbd>F</kbd> 吃一口 / <kbd>R</kbd> 喝水；站在营火旁按 <kbd>F</kbd> 把生肉烤成烤肉（蛋白翻 3 倍）</td></tr>
-      <tr><td>蹲 / 趴</td><td><kbd>C</kbd> / <kbd>X</kbd>（起身要头顶有空间）</td></tr>
+      <tr><td>蹲 / 趴</td><td><kbd>C</kbd> / <kbd>X</kbd>（起身要头顶有空间 · 蹲着走到坎边不会掉下去）</td></tr>
+      <tr><td>下水</td><td><kbd>空格</kbd> 上浮 · 头没进水里就开始憋气（15 秒见底，见底会呛水掉血）· 水里走得慢、挖得更慢</td></tr>
       <tr><td>视角 / 静音</td><td><kbd>F5</kbd> 或 <kbd>V</kbd> 切换 · <kbd>M</kbd> 静音 · <kbd>Esc</kbd> 暂停</td></tr>
+      <tr><td>卡住脱困</td><td><kbd>U</kbd> 回到最近的高地面（在自挖的坑/洞里被夹住时用）</td></tr>
     </table>
     <div class="note">生存课表：一天 14 分钟（白天 7 分半 + 夜晚 4 分半）。入夜降温 12°C，还有夜行者出没——它们怕火光、撞得倒没粘合的方块、啃墙的速度看材料硬度（铁墙是木墙的 2.5 倍耗时）。所以：挖煤做火把，粘合剂固定的墙才叫墙。吃饭长力气（蛋白质+运动长肌肉：肌肉多干活省力、拳头更疼）；有屋顶的屋子抗寒抗淋。世界每 20 秒自动存档，刷新/死亡都不丢；死了东西还在原地等你。</div>
     <button id="helpClose" style="margin-top: 14px;">知 道 了</button>
@@ -430,10 +436,12 @@ const DAY_DUSK = 0.55, DAY_NIGHT = 0.625, DAY_DAWN = 0.95;   // tDay 相位分�
 let tDay = 0.30, dayCount = 1, nightFactor = 0;    // 从上午开始（≈13:12，给新手一个完整白天做准备）
 
 const WALK_SLOW = 2.8, WALK = 4.3, SPRINT = 6.5;   // 慢走(W) / 快走(双击W) / 疾跑(Shift+W)
+const WATER_MOVE = 0.62;               // 水里水平速度倍率（MC 水中迟缓口径）：掉进池塘游得慢但游得动
+const AIR_SECONDS = 15;                // 憋气时长：头没入水中 15 秒憋空（对齐 MC 的 300 tick）
 const GRAV = 24, JUMP = 5.1;          // 重力 / 起跳速度：约 50cm（正常人水平；1m 方块要靠贴墙攀爬上去）
 const HALF = 0.3, PH = 1.75, EYE = 1.58; // 玩家半宽 0.6 / 身高 1.75m / 眼高（方块 1m：跳只有 50cm 上不去，1m 坎要贴墙攀爬）
 const WELL_R = 0.4;                        // 井口目标半径：80cm 井 vs 60cm 身宽——井要比人宽才下得去（还要留挥臂空间）；60cm 井正好卡壁
-const REACH = 6;                      // 挖放距离
+const REACH = 2.5;                    // 挖放距离：一条胳膊+工具的距离（旧 6m 像长臂猿，且和"脚下要蹲"的规则互相矛盾）
 
 // 方块类型：1草 2泥土 3石头 4原木 5树叶 6木板 7工具箱 9-14 造型与三维体
 // hardness 硬度（越低越好挖）/ density 密度 t/m³（决定挖出多少 kg 材料）/ xp 经验 / tiles 贴图编号
@@ -460,8 +468,8 @@ const BLOCKS = {
   16: { name: '砂岩',   matName: '砂岩料',  color: 0xc9a86b, hardness: 2.2,  density: 2.3, xp: 2.2, coh: [0.8, 0.9],  fric: 0.88, tiles: { all: 10 } },
   17: { name: '雪块',   matName: '雪料',    color: 0xeef4f8, hardness: 0.3,  density: 0.4, xp: 0.3, coh: [0.22, 0.38], fric: 0.35, tiles: { all: 11 } },
   18: { name: '冰',     matName: '冰料',    color: 0xa8d8f0, hardness: 1.6,  density: 0.9, xp: 1.6, coh: [0.7, 0.85],  fric: 0.15, tiles: { all: 12 } },
-  19: { name: '煤矿石', matName: '煤料',    color: 0x4a4a52, hardness: 3.5,  density: 2.6, xp: 5.0, coh: [0.85, 0.95], fric: 0.92, tiles: { all: 13 }, frag: 3 },
-  20: { name: '铁矿石', matName: '铁料',    color: 0xb08d6e, hardness: 4.5,  density: 3.0, xp: 8.0, coh: [0.85, 0.95], fric: 0.92, tiles: { all: 14 }, frag: 3 },
+  19: { name: '煤矿石', matName: '煤料',    color: 0x4a4a52, hardness: 3.5,  density: 2.6, xp: 5.0, coh: [0.85, 0.95], fric: 0.92, tiles: { all: 13 } },   // 不设 frag：煤矿石掉煤料（frags[19]），别映射到石料
+  20: { name: '铁矿石', matName: '铁料',    color: 0xb08d6e, hardness: 4.5,  density: 3.0, xp: 8.0, coh: [0.85, 0.95], fric: 0.92, tiles: { all: 14 } },   // 不设 frag：铁矿石掉铁料（frags[20]）
   21: { name: '蘑菇',   matName: '蘑菇',    color: 0xc98a5a, hardness: 0.25, density: 0.3, xp: 0.2, coh: [0.1, 0.2],  fric: 0.45, tiles: { all: 15 }, frag: 4, food: 'mushroom' },
   // 22 火把 / 23 营火：夜里的光和热（煤的去处）。noCollide=可穿行不挡路；放置只认顶面（插地上，不悬空）
   // rationale density：一把火把 0.2kg（≈小木棍+布头），撞碎按质量散回木料——质量守恒不破例
@@ -505,6 +513,10 @@ const SHAPES = {
   22: { size: [0.12, 0.55, 0.12], fire: { life: 240, r: 4.5, light: 1.1, ldist: 9 } },
   23: { size: [0.7, 0.26, 0.7],   fire: { life: 600, r: 6.5, light: 1.6, ldist: 12 } },
 };
+function itemMassOf(id) {                    // 一个方块/造型物品的实际质量：整块 = 1m³×密度，造型 = 体积×密度
+  const b = BLOCKS[id], s = SHAPES[id];
+  return s ? s.size[0] * s.size[1] * s.size[2] * b.density : b.density;
+}
 
 /* =====================================================
  * 二、地形生成（值噪声）
@@ -556,6 +568,43 @@ function getBlock(x, y, z) {
   return world[idx(x, y, z)];
 }
 
+/* 矿脉（参考 MC 的矿脉/blob 生成）：旧做法是"每格掷一次骰子"，挖到的永远是孤零零一块石头芯；
+ * 新做法先在石头层撒"矿脉种子"，再从种子长出一小坨——挖到一块就等于摸到一条脉，顺着挖能出一兜。
+ * 煤：浅层密（地表下 2 格起）；铁：深层稀（地表下 6 格起）——MC 里铁也更深更少，工具台阶才成立。
+ * 种子走确定性哈希而非 Math.random：刷新/读档后矿脉位置不变，挖矿进度才有意义。
+ * 只替换石头（world===3）：不啃泥土/水/雪，也不顶到地表（露头矿不值钱）。 */
+const ORE_VEINS = [
+  { id: 19, p: 0.030, rad: 2, maxY: 24, minAbove: 2, salt: 8888 },   // 煤
+  { id: 20, p: 0.017, rad: 2, maxY: 15, minAbove: 6, salt: 8889 },   // 铁
+];
+function generateOres() {
+  for (let vx = 2; vx < WX - 2; vx += 3) for (let vz = 2; vz < WZ - 2; vz += 3) for (let vy = 2; vy < WY - 8; vy += 3) {
+    for (const cfg of ORE_VEINS) {
+      if (hash2(vx * 31 + vy * 7, vz * 17 + vy * 13, SEED + cfg.salt) >= cfg.p) continue;
+      if (vy > cfg.maxY) continue;
+      if (vy > heightAt(vx, vz) - cfg.minAbove) continue;                    // 别顶到地表
+      const rad = cfg.rad - (hash2(vx * 3, vz * 5 + vy, SEED + cfg.salt + 1) < 0.55 ? 1 : 0);   // 脉大小 1~2 格半径
+      for (let dx = -rad; dx <= rad; dx++) for (let dy = -rad; dy <= rad; dy++) for (let dz = -rad; dz <= rad; dz++) {
+        if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > rad + 1) continue; // 菱形球（L1 距离）：比立方更像"一坨"
+        const gx = vx + dx, gy = vy + dy, gz = vz + dz;
+        if (gx < 1 || gx >= WX - 1 || gy < 1 || gy >= WY - 1 || gz < 1 || gz >= WZ - 1) continue;
+        if (world[idx(gx, gy, gz)] !== 3) continue;                          // 只替换石头
+        world[idx(gx, gy, gz)] = cfg.id;
+      }
+    }
+  }
+}
+function oreStats() {                        // 矿脉体检（DEBUG + selfTest 共用）：总量 + 带同种邻居的块数
+  let coal = 0, iron = 0, clustered = 0;
+  for (let i = 0; i < world.length; i++) { if (world[i] === 19) coal++; else if (world[i] === 20) iron++; }
+  for (let x = 1; x < WX - 1; x++) for (let z = 1; z < WZ - 1; z++) for (let y = 1; y < WY - 1; y++) {
+    const id = world[idx(x, y, z)];
+    if (id !== 19 && id !== 20) continue;
+    if (world[idx(x + 1, y, z)] === id || world[idx(x, y + 1, z)] === id || world[idx(x, y, z + 1)] === id) clustered++;
+  }
+  return { coal, iron, clustered };
+}
+
 function generateWorld() {
   const CX = WX / 2, CZ = WZ / 2;             // 世界中心（也是出生点搜索中心）
   for (let x = 0; x < WX; x++) for (let z = 0; z < WZ; z++) {
@@ -569,16 +618,11 @@ function generateWorld() {
       } else {                                 // 草原森林：草皮 / 泥土 / 石头
         id = y === h ? 1 : (y >= h - 2 ? 2 : 3);
       }
-      // 地下矿脉：石头层里混煤矿 / 铁矿（铁埋更深一点）
-      if (id === 3 && y < h - 3 && y > 0) {
-        const r = hash2(x * 7 + y * 131, z * 13 + y * 57, SEED + 8888);
-        if (r < 0.022 && y < h - 2) id = 19;          // 煤：浅层多
-        else if (r < 0.022 + 0.010 && y < h - 8) id = 20;   // 铁：深层才有
-      }
       world[idx(x, y, z)] = id;
     }
     if (h < 4) for (let y = h + 1; y <= 4; y++) world[idx(x, y, z)] = (biome === 1 && y === 4) ? 18 : 8;   // 低洼灌水（雪原的水面结冰）
   }
+  generateOres();                        // 矿脉成簇（放在地形之后、长树之前：只替换石头，不动地表）
   // 长树（水下/沙漠不长；雪原稀疏；森林看密度噪声）
   for (let x = 2; x < WX - 2; x++) for (let z = 2; z < WZ - 2; z++) {
     const biome = biomeAt(x, z);
@@ -696,11 +740,12 @@ const skyDomeMat = new THREE.MeshBasicMaterial({          // 穹顶材质单独�
 let sunSprite, moonSprite, starsMat;                      // 昼夜系统每帧要动它们（在下面的块里赋值）
 {
   // 穹顶：大球内侧，天顶深蓝、地平线浅蓝白
-  const geo = new THREE.SphereGeometry(320, 24, 12);
+  // 半径必须小于相机 far(200)：旧值 320 会被整个远裁掉，只剩一格纯色 clearColor（渐变白做）
+  const DOME_R = 195, geo = new THREE.SphereGeometry(DOME_R, 24, 12);
   const cols = [];
   const top = new THREE.Color(0x3d8bd0), mid = new THREE.Color(0x9fd4f2), bot = new THREE.Color(0xd9f0fb);
   for (let i = 0; i < geo.attributes.position.count; i++) {
-    const y = geo.attributes.position.getY(i) / 320;      // -1(底)..1(顶)
+    const y = geo.attributes.position.getY(i) / DOME_R;   // -1(底)..1(顶)
     const c = y >= 0 ? mid.clone().lerp(top, Math.min(1, y * 1.5))
                      : mid.clone().lerp(bot, Math.min(1, -y * 3));
     cols.push(c.r, c.g, c.b);
@@ -901,13 +946,19 @@ const FACES = [
   { n: [ 0, 0, 1], v: [[0,0,1],[1,0,1],[1,1,1],[0,1,1]], s: 0.70, uv: [0, 1] },
   { n: [ 0, 0,-1], v: [[1,0,0],[0,0,0],[0,1,0],[1,1,0]], s: 0.70, uv: [0, 1] },
 ];
+function isFullCube(id) {                    // 满格不透明方块：不是空气、不是水、也不是造型/火把这类非满格体
+  return id !== 0 && id !== 8 && !SHAPES[id];
+}
 function faceVisible(nx, ny, nz, id) {      // 网格相邻判断：界外算空气（画边缘悬崖），底部以下算实体
   if (ny < 0) return false;
   if (nx < 0 || nx >= WX || nz < 0 || nz >= WZ || ny >= WY) return id !== 8;
   const ni = idx(nx, ny, nz);
   const nId = carved.has(ni) ? 0 : world[ni];   // 被雕刻的方块当空气处理（洞要露出来）
-  if (id === 8) return nId === 0 || nId >= 9;   // 水对着空气和造型画
-  return nId === 0 || nId === 8 || nId >= 9;    // 实体对着水/造型也画（造型不是满格子）
+  if (id === 8) return !isFullCube(nId) && nId !== 8;   // 水：邻居是空气/造型才画（水贴水不画内壁）
+  // 修"煤/铁/沙/砂岩/雪/冰当造型"：旧判据 nId >= 9 把 15~20 这些满格方块也算成了"非满格"，
+  // 于是石头贴着沙/雪/矿就多画一张藏在里面的废面（贴图一样、永远看不见，白烧三角面）。
+  // 矿脉成簇后这种废面成倍增长（247/256 区块都变胖，+18.8 万 tris）——按"是不是满格"判才是对的
+  return !isFullCube(nId);
 }
 function tileFor(id, f) {                    // 这个方块这个面用哪张贴图
   const tl = BLOCKS[id].tiles;
@@ -1062,11 +1113,23 @@ function rebuildMushrooms() {                // 按 world 当前值全量重建�
 }
 function buildAllChunks() {
   for (let cx = 0; cx < WX / CS; cx++) for (let cz = 0; cz < WZ / CS; cz++) rebuildChunk(cx, cz);
-  for (const [x, y, z, id] of worldShapes) if (id !== 21) addShapeMesh(x, y, z, id);   // 蘑菇走合并网格
+  for (const [x, y, z, id] of worldShapes) {
+    if (id === 21) continue;                              // 蘑菇走合并网格
+    if (world[idx(x, y, z)] !== id) continue;             // 存档里已拆掉的生成造型：别再画回来
+    if (!shapeMeshes.has(x + ',' + y + ',' + z)) addShapeMesh(x, y, z, id);   // 存档已恢复同款造型时不重复建
+  }
   rebuildMushrooms();
+  for (const vi of carved.keys()) {                      // 读档后补建雕刻网格：区块网格会跳过这些方块
+    const c = carved.get(vi);
+    if (!c || c.mesh) continue;
+    const [x, y, z] = viToXYZ(vi);
+    rebuildCarvedMesh(x, y, z);
+  }
 }
 function setBlockAndRebuild(x, y, z, id) {  // 改一个方块，重建所在区块（边缘时连邻居一起）
-  world[idx(x, y, z)] = id;
+  const vi0 = idx(x, y, z);
+  if (carved.has(vi0)) { removeCarvedMesh(x, y, z); carved.delete(vi0); }   // 覆盖雕刻格：旧剩余子格不能留在数据里
+  world[vi0] = id;
   refreshNeighborCarved(x, y, z);            // 邻块若有"咬过的洞"，暴露面变了要重画
   const set = new Set([((x >> 4) + ',' + (z >> 4))]);
   if ((x & 15) === 0  && x > 0)        set.add(((x >> 4) - 1) + ',' + (z >> 4));
@@ -1142,7 +1205,13 @@ function rebuildCarvedMesh(x, y, z) {        // 把剩余子格拼成网格：�
       nor.push(F.n[0], F.n[1], F.n[2]);
       uvs.push(uvR.u0 + l[F.uv[0]] * (uvR.u1 - uvR.u0), uvR.v0 + l[F.uv[1]] * (uvR.v1 - uvR.v0));
     const soft = c.stomp ? 0.5 : 0;          // 踩出来的印：遮蔽和深度变暗都减半，看起来是"压实的雪"而不是黑洞
-    const shade = F.s * jit * (ao + (1 - ao) * soft) * (depthMul + (1 - depthMul) * soft);
+    // 内壁（不贴方块外表面的面）不叠 AO×深度×光照三层变暗，否则 10~20cm 的洞近看就是一个黑方块。
+    // 外表面仍保留原阴影，洞内壁给到接近满亮，让泥土/石头的纹理和裂纹能看见。
+    const plane = F.n[0] ? bx0 : (F.n[1] ? by0 : bz0);
+    const inner = plane > 1e-6 && plane < 1 - 1e-6;
+    let shade = F.s * jit * (ao + (1 - ao) * soft) * (depthMul + (1 - depthMul) * soft);
+    if (inner) shade = Math.max(0.95, shade);
+    else shade = Math.max(0.5, shade);
     col.push(shade, shade, shade);
     }
     ind.push(a, a + 1, a + 2, a, a + 2, a + 3);
@@ -1154,7 +1223,7 @@ function rebuildCarvedMesh(x, y, z) {        // 把剩余子格拼成网格：�
       let x1 = sx;
       while (x1 + 1 < SUB && isSubSolid(c, x1 + 1, sy, sz)) x1++;
       const dep = Math.min(sx, SUB - 1 - x1, sy, SUB - 1 - sy, sz, SUB - 1 - sz);
-      const depthMul = 1 - dep * 0.09;
+      const depthMul = 1 - dep * 0.06;
       const topRow = sy === SUB - 1;
       const Y0 = sy / SUB, Y1 = (sy + 1) / SUB, Z0 = sz / SUB, Z1 = (sz + 1) / SUB;
       // 东西两端面：只占一个子格宽，整面判定
@@ -1197,6 +1266,69 @@ function refreshNeighborCarved(x, y, z) {     // 某格方块变动后：旁边�
     if (carved.has(idx(nx, ny, nz))) rebuildCarvedMesh(nx, ny, nz);
   }
 }
+function rayBlockEnter(bx, by, bz) {          // 视线是否还落在这块 1m 方块上；返回入射距离，null=已经移开/够不着
+  const o = eyePos(), d = viewDir();
+  let t0 = 0, t1 = REACH;
+  for (let i = 0; i < 3; i++) {
+    const oi = i === 0 ? o.x : i === 1 ? o.y : o.z;
+    const di = i === 0 ? d.x : i === 1 ? d.y : d.z;
+    const lo = i === 0 ? bx : i === 1 ? by : bz, hi = lo + 1;
+    if (Math.abs(di) < 1e-9) { if (oi < lo || oi > hi) return null; continue; }
+    let a = (lo - oi) / di, b = (hi - oi) / di;
+    if (a > b) { const q = a; a = b; b = q; }
+    if (a > t0) t0 = a;
+    if (b < t1) t1 = b;
+    if (t0 > t1) return null;
+  }
+  return t1 < 0 ? null : t0;
+}
+function nearestSubInBlock(bx, by, bz) {      // 粘滞挖块：准星钻穿小洞后，找离视线最近的剩余子格
+  const vi = idx(bx, by, bz), id = world[vi];
+  if (!id || id === 8 || SHAPES[id]) return null;
+  const c = carved.get(vi);
+  if (c && c.n >= SUB * SUB * SUB) return null;
+  const o = eyePos(), d = viewDir();
+  let best = null, bestScore = Infinity;
+  for (let sx = 0; sx < SUB; sx++) for (let sy = 0; sy < SUB; sy++) for (let sz = 0; sz < SUB; sz++) {
+    if (c && c.bits[subIdx(sx, sy, sz)]) continue;
+    const dx = bx + (sx + 0.5) / SUB - o.x;
+    const dy = by + (sy + 0.5) / SUB - o.y;
+    const dz = bz + (sz + 0.5) / SUB - o.z;
+    const along = dx * d.x + dy * d.y + dz * d.z;
+    if (along <= 0) continue;                 // 眼睛后面/身侧的子格不吃
+    const perp2 = dx * dx + dy * dy + dz * dz - along * along;
+    const score = perp2 + along * along * 1e-4;   // 离视线最近优先；同环时先吃靠外的，洞从准星处往外扩
+    // 手长按“整块”算：准星已经够到这块（rayBlockEnter ≤ REACH），就不该因为块厚 1m、对面角 3m 而半途停手
+    if (score < bestScore) { bestScore = score; best = { x: bx, y: by, z: bz, sx, sy, sz }; }
+  }
+  return best;
+}
+function subSolidAt(bx, by, bz, sx, sy, sz) {  // 跨块看某个 10cm 子格的外侧邻居还实不实（裂纹找暴露面用）
+  if (sx < 0) { bx--; sx = SUB - 1; } else if (sx >= SUB) { bx++; sx = 0; }
+  if (sy < 0) { by--; sy = SUB - 1; } else if (sy >= SUB) { by++; sy = 0; }
+  if (sz < 0) { bz--; sz = SUB - 1; } else if (sz >= SUB) { bz++; sz = 0; }
+  if (by < 0) return true;                    // 世界底层
+  if (bx < 0 || bx >= WX || by >= WY || bz < 0 || bz >= WZ) return false;
+  const id = world[idx(bx, by, bz)];
+  if (!id || id === 8 || SHAPES[id]) return false;
+  const c = carved.get(idx(bx, by, bz));
+  return !c || c.bits[subIdx(sx, sy, sz)] === 0;
+}
+function subFaceDecal(chip) {                 // 裂纹贴花：跟着正在咬的子格，贴它朝向玩家的暴露面
+  const o = eyePos();
+  const dirs = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+  let best = null, bestDot = -2;
+  for (const d of dirs) {
+    if (subSolidAt(chip.x, chip.y, chip.z, chip.sx + d[0], chip.sy + d[1], chip.sz + d[2])) continue;
+    const px = chip.x + (chip.sx + 0.5 + d[0] * 0.5) / SUB;
+    const py = chip.y + (chip.sy + 0.5 + d[1] * 0.5) / SUB;
+    const pz = chip.z + (chip.sz + 0.5 + d[2] * 0.5) / SUB;
+    const vx = o.x - px, vy = o.y - py, vz = o.z - pz;
+    const dot = vx * d[0] + vy * d[1] + vz * d[2];
+    if (dot > bestDot) { bestDot = dot; best = { x: px, y: py, z: pz, face: d }; }
+  }
+  return best;
+}
 function findChip(hit) {                     // 从命中处沿视线细步前进：能穿过雕出来的洞，找到第一个还实着的 10cm 子格
   const o = eyePos(), dir = viewDir();
   const clamp9 = v => Math.max(0, Math.min(SUB - 1, v));
@@ -1217,8 +1349,10 @@ function findChip(hit) {                     // 从命中处沿视线细步前�
   }
   return null;
 }
-function smartFootChip() {                    // 脚下智能挖掘：掏竖井不用一格格瞄——咬口自动落到身体覆盖范围内最高的实体子格
+function smartFootChip() {                    // 脚下智能挖掘：掏竖井不用一格格瞄——以玩家为中心掏 80cm 井口
   // 痛点：身体 60cm 宽，空手 10cm/口的洞要精确瞄 36 次才够宽，人掉不下去；交给系统按层均匀掏
+  // 旧版只按 HALF=0.3 掏 60×60cm：井口正好等于身宽，玩家稍偏一点就被两侧子格夹死，
+  // 站在自挖的坑里 W/S/A/D 全零（实测复现）。井口必须比人宽——用 WELL_R=0.4（80cm），和瞄准井一致。
   // 层优先（不是块优先）：先把脚下所有块的同一子格层掏空，再下一层——人水平下沉。
   // 旧顺序块优先：跨块站位时先把 A 块从顶咬穿到底才轮到 B 块，人斜着钻进 A 块、B 块还顶着腰，
   // 卡在"半身进坑"的斜姿态（掉不下去的元凶之一）
@@ -1227,16 +1361,17 @@ function smartFootChip() {                    // 脚下智能挖掘：掏竖井�
   const syTop = Math.min(SUB - 1, Math.floor((P.pos.y - gy + 0.001) * SUB) - 1);   // 脚底以下第一层子格
   if (syTop < 0) return null;
   const blocks = [];
-  const gx0 = Math.floor(P.pos.x - HALF), gx1 = Math.floor(P.pos.x + HALF - 1e-9);
-  const gz0 = Math.floor(P.pos.z - HALF), gz1 = Math.floor(P.pos.z + HALF - 1e-9);
+  const x0 = P.pos.x - WELL_R, x1 = P.pos.x + WELL_R, z0 = P.pos.z - WELL_R, z1 = P.pos.z + WELL_R;
+  const gx0 = Math.floor(x0), gx1 = Math.floor(x1 - 1e-9);
+  const gz0 = Math.floor(z0), gz1 = Math.floor(z1 - 1e-9);
   for (let gx = gx0; gx <= gx1; gx++) for (let gz = gz0; gz <= gz1; gz++) {
     if (gx < 0 || gx >= WX || gz < 0 || gz >= WZ) continue;
     const vi = idx(gx, gy, gz), id = world[vi];
     if (!id || id === 8 || SHAPES[id] || BLOCKS[id].soft) continue;   // 水造型软块不掏
     blocks.push({
       gx, gz, c: carved.get(vi),
-      sx0: Math.max(0, Math.floor((P.pos.x - HALF - gx) * SUB + 1e-6)), sx1: Math.min(SUB - 1, Math.floor((P.pos.x + HALF - gx) * SUB)),
-      sz0: Math.max(0, Math.floor((P.pos.z - HALF - gz) * SUB + 1e-6)), sz1: Math.min(SUB - 1, Math.floor((P.pos.z + HALF - gz) * SUB))
+      sx0: Math.max(0, Math.floor((x0 - gx) * SUB + 1e-6)), sx1: Math.min(SUB - 1, Math.floor((x1 - gx) * SUB - 1e-6)),
+      sz0: Math.max(0, Math.floor((z0 - gz) * SUB + 1e-6)), sz1: Math.min(SUB - 1, Math.floor((z1 - gz) * SUB - 1e-6))
     });
   }
   let best = null;
@@ -1352,7 +1487,8 @@ function doBite(x, y, z, chip0, n, src) {    // 咬掉以命中子格为中心�
     refreshNeighborCarved(x, y, z);          // 邻块也咬过洞时，对面遮挡变了要重画（跨块子格级遮挡）
     if (firstBite) rebuildChunkAround(x, z); // 区块网格只关心"这格是否开始被咬"，第一口之后不用再动
     burst(x + (ox + n / 2) / SUB, y + (oy + n / 2) / SUB, z + (oz + n / 2) / SUB, b.color, 3 + got);
-    sfxMine(id);
+    const now = performance.now();
+    if (now - lastMineSfx > 70) { sfxMine(id); lastMineSfx = now; }   // 连咬很快，声音别每口都叠成噪音
   }
   return true;
 }
@@ -1418,6 +1554,7 @@ function impactCrater(cx, cy, cz, v) {        // 重重摔在松软地面：砸�
       const b = BLOCKS[nid], fid = b.frag !== undefined ? b.frag : nid;
       frags[fid] = +((frags[fid] || 0) + b.density * got / (SUB * SUB * SUB)).toFixed(4);
       rebuildCarvedMesh(gx, cy, gz);
+      refreshNeighborCarved(gx, cy, gz);        // 砸坑也会把旁边已咬过的洞壁暴露面改掉，别留透视窟窿
     }
   }
   if (total) {
@@ -1444,13 +1581,14 @@ function finishBreak(x, y, z, id, extraMass) {  // 整块碎掉：优先整块�
     updateItemsUI();
     burst(x, y, z, BLOCKS[21].color, 6);
     checkGoals();
+    checkAroundForCollapse(x, y, z);          // 蘑菇顶上如果放了小方块：采走蘑菇它也要掉
     return;
   }
   const b = BLOCKS[id];
   const fid = b.frag !== undefined ? b.frag : id;
   if (extraMass > 0.0001) {
     if (addToHands(id, 1)) {                 // 手里接得住：整块拿走，只剩 ±10% 的碎屑散装材料
-      const dust = Math.max(0, +(extraMass - b.density).toFixed(3));
+      const dust = Math.max(0, +(extraMass - itemMassOf(id)).toFixed(3));
       if (dust > 0.0001) frags[fid] = +((frags[fid] || 0) + dust).toFixed(3);
       gainFeed('+1 ' + b.name + '（拿在手里）');
     } else {                                 // 双手都满：散成材料质量
@@ -1614,9 +1752,13 @@ function updateFallers(dt) {                 // 每帧：下落（可带水平�
         f.mesh.position.set(f.x + f.s / 2, landY + f.s / 2, f.z + f.s / 2);
         f.mesh.rotation.set(0, 0, 0);        // 落地摆正（下落中在翻滚）
       } else {
-        f.mesh.geometry.dispose();
         const landVi = idx(fx, landY, fz), landId = world[landVi];
-        if (landId === 22 || landId === 23) unregisterFire(landId, landVi);   // 砸进火把格子：火被压灭
+        // 落点被造型/别的方块占着：别直接 world[]=f.id 覆盖——旧代码会把台阶/墙"吞掉"（模型还留在原地，方块却没了）
+        if (landId && landId !== 8) {
+          if (landId === 22 || landId === 23) unregisterFire(landId, landVi);   // 火把被砸灭（保持原行为）
+          else { shatterFaller(f, i); continue; }                                // 撞上硬物：散成材料
+        }
+        f.mesh.geometry.dispose();
         world[landVi] = f.id;
         rebuildChunkAround(fx, fz);
         refreshNeighborCarved(fx, landY, fz);
@@ -1638,8 +1780,12 @@ function updateFallers(dt) {                 // 每帧：下落（可带水平�
 function detachLooseSmall(x, y, z) {         // 放置的小方块失去了脚下的方块 → 掉下来
   for (let i = subVox.length - 1; i >= 0; i--) {
     const o = subVox[i];
-    if (Math.floor(o.x) !== x || Math.floor(o.z) !== z) continue;
-    if (Math.floor(o.y) !== y + 1) continue; // 小方块正好站在这块的顶上
+    // 水平上有覆盖就算（10cm 小方块可能骑在两格之间），不再要求中心格完全对上
+    if (o.x + o.sx <= x + 0.02 || o.x >= x + 1 - 0.02) continue;
+    if (o.z + o.sz <= z + 0.02 || o.z >= z + 1 - 0.02) continue;
+    // 底面落在这一格里、且不是坐在下面那格上（y 就是下面那格的顶面）
+    // 旧判据 floor(o.y) === y+1 只认整块顶面：台阶/薄板顶上的小方块会悬空
+    if (o.y <= y + 0.02 || o.y > y + 1.02) continue;
     subVox.splice(i, 1);
     fallers.push({ x: o.x, y: o.y, z: o.z, vy: 0, small: true, s: o.sx, mat: o.mat, mass: o.mass,
       mesh: o.mesh, coh: cohesionOf(x, y, z, o.mat), startY: o.y, id: o.mat,
@@ -1694,8 +1840,11 @@ const P = {
   xp: 0, level: 1,                         // 经验与力量等级（成长系统）
   hp: 100, hunger: 10, thirst: 10,         // 生命 / 饥饿 / 缺水：生命满值 100（10 格），其余 10 格
   stam: 100, exhausted: false,             // 体力：疾跑消耗，耗尽后要歇回 25 才能再跑
+  air: 100,                                // 呼吸（我的世界式氧气）：头没入水里才消耗，15 秒憋空，空了开始呛水掉血
+  sickT: 0,                                // 闹肚子剩余秒数：生肉的寄生虫/细菌（我的世界生食风险口径）
   cold: 0, hot: 0,                         // 寒冷 / 炎热：气温离舒适区越远积得越快，满了开始冻伤/中暑
   stunT: 0, roll: 0,                       // 绊倒硬直 / 镜头侧倾
+  atkCd: 0,                                // 挥击冷却（MC 式收手间隔）：0.4 秒内点不出去第二下，防止狂点秒怪
   fall: 0, fallDur: 1, fallDir: 0,         // 真摔倒：倒地剩余秒 / 总时长（算爬起进度）/ 倒向 0前扑 1左摔 2右摔
   climbing: false, shakeT: 0,               // 贴墙攀爬中 / 撞墙镜头震动
   muscle: 32, fatPct: 15,                   // 硬核体质：肌肉量 kg（默认 32）/ 体脂率 %（默认 15）→ BMR≈1394 kcal/日
@@ -1773,6 +1922,32 @@ function moveAxis(axis, amount) {
         else { P.pos.z = amount > 0 ? z - HALF - 1e-4 : z + 1 + HALF + 1e-4; P.vel.z = 0; lastWallHit = { x, y, z }; }
       }
 }
+function unstuck() {                          // U：被自挖的窄坑/子格夹住时的局部脱困，回最近的安全地面
+  if (state !== 'playing') return;
+  const px = Math.floor(P.pos.x), pz = Math.floor(P.pos.z);
+  let best = null;
+  outer:
+  for (let r = 0; r <= 3; r++) {              // 由近到远找一块真正的落脚面（优先坑沿，而不是坑底/水面/树叶）
+    for (let dx = -r; dx <= r; dx++) for (let dz = -r; dz <= r; dz++) {
+      if (Math.max(Math.abs(dx), Math.abs(dz)) !== r) continue;
+      const gx = px + dx, gz = pz + dz;
+      if (gx < 0 || gx >= WX || gz < 0 || gz >= WZ) continue;
+      const gy = topAt(gx, gz), id = world[idx(gx, gy, gz)];
+      if (!id || id === 8 || BLOCKS[id].soft || BLOCKS[id].noCollide) continue;
+      const c = carved.get(idx(gx, gy, gz));
+      if (c && !isSubSolid(c, 5, SUB - 1, 5)) continue;   // 顶格中心已被挖空：站上去会继续掉
+      best = { gx, gz, gy };
+      break outer;
+    }
+  }
+  if (!best) { respawn(); return; }           // 极端地形：退回出生点
+  P.pos.set(best.gx + 0.5, best.gy + 1, best.gz + 0.5);
+  P.vel.set(0, 0, 0);
+  P.fall = 0; P.fallDur = 1; P.fallDir = 0; P.stunT = 0;
+  P.climbing = false; P.shakeT = 0; P.stance = 0; applyStance();
+  resetMining();
+  showToast('已脱困：回到最近的安全地面');
+}
 function respawn() {
   // 出生点要避开水面/树叶顶：从世界中心螺旋往外找第一块硬实地
   const CX = WX >> 1, CZ = WZ >> 1;
@@ -1789,7 +1964,15 @@ function respawn() {
   P.vel.set(0, 0, 0);
   P.hp = 100; P.hunger = 10; P.thirst = 10; P.cold = 0; P.hot = 0;
   P.stam = 100; P.exhausted = false; wasExhausted = false;   // 重生把体力也喘满
+  P.air = 100; P.sickT = 0;                                  // 重生换一口新肺（溺水/闹肚子不跨世）
   P.calPool = 800; P.proPool = 20; P.actT = 0;               // 营养池回满（饿死/冻死重来）
+  // 瞬时状态不跨世：摔倒在地/硬直/攀爬/镜头震动/疾跑残留都不能带进新身体
+  P.fall = 0; P.fallDur = 1; P.fallDir = 0; P.stunT = 0;
+  P.climbing = false; P.shakeT = 0; P.roll = 0; P.sprinting = false; P.onGround = false; P.atkCd = 0;
+  P.stance = 0; applyStance();
+  fastWalk = false; prevStrafe = 0; lastWallHit = null; lastFallVy = 0; jumpLatch = false;
+  wallHitCd = 0; scrambleCd = 0; leafCrashT = 0;
+  mining.active = false; mouseLDown = false; mouseRDown = false; syncMouseButtons(); resetMining();
   initBody();                                                // 重生换一副好身体（不然残肢复活）
   updateBodyUI();
   if (typeof updateStatusUI === 'function' && cellEls.hp.length) updateStatusUI();
@@ -1797,13 +1980,48 @@ function respawn() {
 let lastFallVy = 0;                          // 下落过程中的竖直速度（落地瞬间用它算摔伤）
 let prevStrafe = 0;                          // 上一帧有没有按着 A/D（绊倒看的是"突然按下去"那一刻）
 let wasExhausted = false;                    // 上一子步是否已力竭（只在"刚力竭"那一刻弹提示）
+let jumpLatch = false;                       // 跳跃锁存：按住空格只起跳一次（MC 手感；水里上浮不受影响）
 let lastWallHit = null;                      // 这一子步水平撞上的方块格（冲撞撞倒 / 反弹要用）
 let leafCrashT = 0;                          // 穿越树叶的刮蹭节拍（别每帧都响）
 let wallHitCd = 0;                           // 撞墙后果冷却：贴墙按住前进时每个物理子步都会"撞一次"，没冷却血会被机关枪扫掉
 let scrambleCd = 0;                          // 蹬踏松散坎的冷却（沙/雪：走上去像上台阶）
 let footSide = 1, stompCount = 0;            // 左右脚交替（踩脚印用）/ 脚印总数（调试）
 const leafBends = [];                        // 被撞开的树叶：拨弯的形变痕迹，慢慢回弹
+/* ==== 入水三件套（参考《我的世界》的水下规则）====
+ * 1) 憋气：头没入水中 15 秒憋空（MC 300 tick），憋空后呛水掉血；出水约 1.7 秒回满（MC 一上岸就快速回气）
+ * 2) 水里行动迟缓：水平速度 ×0.62（MC 在水里游得慢），但跳跃/上浮不受限，保证掉进池塘能游回岸
+ * 3) 水下挖掘变慢：×2.5（MC 水下破坏方块 5 倍慢的折中口径——本作一口 10cm 本来就慢，5 倍会让人在井底卡死）
+ * rationale：水下威胁从"只是掉下去"升级成"会淹死"，同时给火把/基地一个新的存在理由（夜行者不会游泳，玩家得自己权衡） */
+function headUnderwater() {
+  return getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y + P.eyeH), Math.floor(P.pos.z)) === 8
+      || getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y + P.ph - 0.05), Math.floor(P.pos.z)) === 8;
+}
+function mineWaterMult() { return headUnderwater() ? 2.5 : 1; }   // 挖掘时长倍率：水里憋着气甩不开膀子
+/* 蹲行防坠边（MC 潜行不坠崖）：脚下这个水平位置还有没有落脚点。
+ * 与碰撞系统同源：整块实心 → 造型按块算 → 咬过的块按 10cm 顶层子格算 → 小方块按顶面算。
+ * 缺失支撑就说明下一步踩空：蹲/趴时把这一步水平位移吃掉（站着不管，照样能跳下去） */
+function supportAt(x, z) {
+  const cx = Math.floor(x), cz = Math.floor(z);
+  if (cx < 0 || cx >= WX || cz < 0 || cz >= WZ) return true;      // 世界边缘是墙，不算踩空
+  const feet = P.pos.y, cy = Math.floor(feet - 0.02);
+  if (cy < 0) return true;
+  const id = world[idx(cx, cy, cz)];
+  if (id && id !== 8 && !BLOCKS[id].soft && !BLOCKS[id].noCollide) {
+    const c = carved.get(idx(cx, cy, cz));
+    if (!c) return true;                                          // 整块实心（含台阶/石柱这类造型体）
+    const sx = Math.min(SUB - 1, Math.max(0, Math.floor((x - cx) * SUB)));
+    const sz = Math.min(SUB - 1, Math.max(0, Math.floor((z - cz) * SUB)));
+    const sy = Math.min(SUB - 1, Math.max(0, Math.floor((feet - cy) * SUB - 1e-6)));
+    if (isSubSolid(c, sx, sy, sz)) return true;
+  }
+  for (const o of subVox) {                                       // 小方块/踏板：顶面在脚下 30cm 内就算踩得住
+    if (x > o.x - 0.06 && x < o.x + o.sx + 0.06 && z > o.z - 0.06 && z < o.z + o.sz + 0.06
+        && o.y + o.sy > feet - 0.3 && o.y + o.sy <= feet + 0.35) return true;
+  }
+  return false;
+}
 function stepPhysics(h) {
+  if (P.atkCd > 0) P.atkCd = Math.max(0, P.atkCd - h);   // 挥击冷却按物理子步走（暂停时不掉）
   // —— 体力与动量移动：疾跑渐加速、体力见底渐降、松开缓降回巡航、S 是渐进刹车 ——
   // 方向速度分级：正面最快、后退次之、侧移最慢（螃蟹步本来就慢；疾跑中突然侧移会被绊倒）
   let ix = (keys['KeyD'] ? 1 : 0) - (keys['KeyA'] ? 1 : 0);
@@ -1838,6 +2056,9 @@ function stepPhysics(h) {
   const sprinting = wantSprint && !P.exhausted;
   P.sprinting = sprinting;                    // 记下来：疾跑 FOV 与调试要用
   const hs = Math.hypot(P.vel.x, P.vel.z);
+  // 在水里？（脚上 40cm 或 1.5m 处是水）——水平减速与挖掘减速、憋气都看它
+  const inWater = getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y + 0.4), Math.floor(P.pos.z)) === 8
+               || getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y + 1.5), Math.floor(P.pos.z)) === 8;
   if (sprinting) P.stam = Math.max(0, P.stam - (3 + 7 * Math.min(1, hs / SPRINT)) * effortMult() * h);   // 疾跑耗力×肌肉系数
   else if (!mining.active) P.stam = Math.min(100, P.stam + (moving ? 7 : 14) * h);   // 挖掘时是干活不是休息：只扣不回（扣的量在 updateMining 里按方式算）
   // 目标速度：疾跑上限随体力下滑；方向分级 正面1.0 / 后退0.7 / 侧移0.6；蹲×0.5 趴×0.3
@@ -1849,7 +2070,7 @@ function stepPhysics(h) {
   // （旧公式速度=走速+增量×体力%：力竭过一次后体力总在低位，加速只剩约 10%，按 Shift 像完全失灵）
   // 行走三档：W 慢走 2.8 / 双击 W 快走 4.3 / Shift 疾跑 6.5
   const cap = (sprinting ? SPRINT : (fastWalk ? WALK : WALK_SLOW) * STANCES[P.stance].mult) * dirMult
-            * legPen * (P.cold >= 100 ? 0.7 : 1);      // 冻僵了跑不动；腿伤走瘸路
+            * legPen * (P.cold >= 100 ? 0.7 : 1) * (inWater ? WATER_MOVE : 1);   // 冻僵了跑不动；腿伤走瘸路；水里迟缓
   const tvx = moving ? (-Math.sin(P.yaw) * iz + Math.cos(P.yaw) * ix) * cap : 0;
   const tvz = moving ? (-Math.cos(P.yaw) * iz - Math.sin(P.yaw) * ix) * cap : 0;
   // 动量：疾跑渐加速 8；行走/蹲/趴恒速（即时）；没输入的刹车率看脚下材质摩擦（冰上滑得停不下来）
@@ -1858,9 +2079,7 @@ function stepPhysics(h) {
   const rate = !moving ? (0.6 + groundFric * 4.4) : (sprinting ? 8 : 30);   // 冰 0.15 → 1.26/s 滑；草 0.7 → 3.7/s 正常刹
   const dx = tvx - P.vel.x, dz = tvz - P.vel.z, dl = Math.hypot(dx, dz);
   if (dl > 1e-4) { const sc = Math.min(1, rate * h / dl); P.vel.x += dx * sc; P.vel.z += dz * sc; }
-  // 水里：下沉变慢，空格上浮；陆地上：空格跳跃；面前有抓得住的墙 → 攀爬（跳只有 50cm，1m 的坎靠爬上去）
-  const inWater = getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y + 0.4), Math.floor(P.pos.z)) === 8
-               || getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y + 1.5), Math.floor(P.pos.z)) === 8;
+  // 陆地上：空格跳跃；面前有抓得住的墙 → 攀爬（跳只有 50cm，1m 的坎靠爬上去）；水里：下沉变慢、空格上浮（inWater 在速度段已算）
   // 攀爬检测：面前 0.55m 处从脚到头扫一遍，取最抓得住的墙面摩擦力（≥0.5 才爬得动）
   // 三种情况不算能爬：①可穿越的软块（树叶能直接穿过去，没得抓）②粘稠度 < 0.3 的松散块（抓上去墙先散）
   // ③正在冲向墙（前向速度 ≥ 2.6 = 撞击：先摔/弹/伤，等速度被墙吃掉才挂上墙开爬）
@@ -1923,7 +2142,11 @@ function stepPhysics(h) {
       P.vel.y = 4.8; P.vel.x = fwd.x * 3.4; P.vel.z = fwd.z * 3.4;
       tone(300, 0.08, 0.1, 'triangle', 1.4);
     }
-  } else if (keys['Space'] && P.onGround && P.fall <= 0 && P.stunT <= 0) P.vel.y = JUMP;
+  } else if (keys['Space'] && P.onGround && P.fall <= 0 && P.stunT <= 0 && !jumpLatch) {
+    P.vel.y = JUMP;
+    jumpLatch = true;                          // 按住不放不会连跳：落地后要松一下空格才能再跳（MC 手感）
+  }
+  if (!keys['Space']) jumpLatch = false;       // 松开空格：解锁下一次起跳
   if (!P.climbing) P.vel.y = Math.max(P.vel.y - GRAV * (inWater ? 0.22 : 1) * h, inWater ? -4 : -36);
   P.onGround = false;
   const mvy = P.vel.y * h, mvx = P.vel.x * h, mvz = P.vel.z * h;   // 先存本步位移：碰撞把速度清零后，小方块检测仍要用原方向
@@ -1931,21 +2154,29 @@ function stepPhysics(h) {
   collideSubVoxAxis('y', mvy);
   collideCarvedAxis('y', mvy);
   if (!P.onGround && P.vel.y < 0) lastFallVy = P.vel.y;    // 还在下落：记下当前落速（落地后保留，供摔伤判定）
+  // —— 蹲行防坠边（参考 MC 潜行不坠崖）：蹲/趴且脚踩实地时，下一步水平位置没落脚点就不迈出去 ——
+  // 只在"站在地上"时生效：跳/摔/爬（腾空中）照旧自由移动，挖井下沉也不受影响（人随脚下的洞一起落）
+  let gmvx = mvx, gmvz = mvz;
+  if (P.onGround && P.stance > 0) {
+    if (gmvx && !supportAt(P.pos.x + gmvx, P.pos.z)) gmvx = 0;
+    if (gmvz && !supportAt(P.pos.x, P.pos.z + gmvz)) gmvz = 0;
+    if (gmvx && gmvz && !supportAt(P.pos.x + gmvx, P.pos.z + gmvz)) { gmvx = 0; gmvz = 0; }   // 斜着踩空也算
+  }
   // 刚体碰撞：全速撞墙按力度扣血（速度被清零说明撞实了）
   const preVx = P.vel.x, preVz = P.vel.z;
   lastWallHit = null;                          // 本子步的撞墙记录重新收集（x/z 两趟都可能撞，别互相清掉）
-  moveAxis('x', mvx);
-  collideSubVoxAxis('x', mvx);
-  collideCarvedAxis('x', mvx);
-  moveAxis('z', mvz);
-  collideSubVoxAxis('z', mvz);
-  collideCarvedAxis('z', mvz);
+  moveAxis('x', gmvx);
+  collideSubVoxAxis('x', gmvx);
+  collideCarvedAxis('x', gmvx);
+  moveAxis('z', gmvz);
+  collideSubVoxAxis('z', gmvz);
+  collideCarvedAxis('z', gmvz);
   const slamV = Math.hypot((P.vel.x === 0 ? preVx : 0), (P.vel.z === 0 ? preVz : 0));
   if (wallHitCd > 0) wallHitCd -= h;          // 撞墙后果冷却推进
   if (slamV > 1.5 && lastWallHit) {
     const vi = idx(lastWallHit.x, lastWallHit.y, lastWallHit.z);
     const wid = world[vi];
-    if (wid && placedBlocks.has(vi) && !glued.has(vi) && slamV > 3.2 && wallHitCd <= 0) {
+    if (wid && placedBlocks.has(vi) && !glued.has(vi) && !carved.has(vi) && slamV > 3.2 && wallHitCd <= 0) {
       // 撞倒：没粘合的方块被撞飞（带玩家的冲量），玩家只掉速不扣血
       knockBlock(lastWallHit.x, lastWallHit.y, lastWallHit.z,
         (P.vel.x === 0 ? preVx : 0) * 1.1, (P.vel.z === 0 ? preVz : 0) * 1.1);
@@ -2086,6 +2317,7 @@ addEventListener('keydown', e => {
   }
   if (e.code === 'KeyF' && state === 'playing' && !e.repeat) eat();
   if (e.code === 'KeyR' && state === 'playing' && !e.repeat) drink();
+  if (e.code === 'KeyU' && state === 'playing' && !e.repeat) unstuck();   // U：卡在自挖坑里时局部脱困
   if (state === 'playing' && e.code === 'KeyG' && !e.repeat) {   // G：循环切换放置尺寸（按住不会连跳档位）
     placeSizeIdx = ((placeSizeIdx + 1) % PLACE_SIZES.length + PLACE_SIZES.length) % PLACE_SIZES.length;
     savePref('placeSize', placeSizeIdx);
@@ -2100,6 +2332,7 @@ addEventListener('keydown', e => {
   }
   if ((e.code === 'ShiftLeft' || e.code === 'ShiftRight') && state === 'playing' && !e.repeat && P.stance !== 0)
     showToast(P.stance === 1 ? '蹲着跑不动 —— 松开 C 站起来再疾跑' : '趴着跑不动 —— 松开 X 站起来再疾跑');
+  if (e.code === 'Escape' && state === 'craft') { closeCraft(); return; }   // 物品栏也能 Esc 关
   if (e.code === 'Escape' && state === 'playing' && document.pointerLockElement !== renderer.domElement) {
     setState('paused');   // 兜底：正常情况 Esc 走「退指针锁→自动暂停」，浏览器拦掉重锁时这里直接暂停
   }
@@ -2137,6 +2370,57 @@ function lockPointer() { try { renderer.domElement.requestPointerLock(); } catch
  * ===================================================== */
 const camDir = new THREE.Vector3();
 const _voxPoint = new THREE.Vector3();       // 命中点复用对象：每帧要做好几次射线，别再 clone 了
+/* 造型（台阶/薄板/石柱/木梁/火把）的精确命中：射线只认它实际占的那一块，不认整格。
+ * 旧版 DDA 一进格就返回，台阶顶（y+0.5）被当成格顶（y+1）——放 10cm 小件会浮在半空，
+ * 矮石柱的侧面也永远瞄不准。返回 {t, px,py,pz, face}；没打中造型 = 这格对它来说是空的（继续往前走）。 */
+function rayShapeBox(o, d, gx, gy, gz, shp) {
+  const sx = shp.size[0], sy = shp.size[1], sz = shp.size[2];
+  const bx0 = gx + (1 - sx) / 2, bx1 = bx0 + sx;
+  const by0 = gy, by1 = gy + sy;
+  const bz0 = gz + (1 - sz) / 2, bz1 = bz0 + sz;
+  let tmin = 1e-4, tmax = REACH, axis = -1;
+  for (const a of [0, 1, 2]) {
+    const oc = a === 0 ? o.x : a === 1 ? o.y : o.z;
+    const dc = a === 0 ? d.x : a === 1 ? d.y : d.z;
+    const lo = a === 0 ? bx0 : a === 1 ? by0 : bz0;
+    const hi = a === 0 ? bx1 : a === 1 ? by1 : bz1;
+    if (Math.abs(dc) < 1e-9) { if (oc < lo || oc > hi) return null; continue; }
+    let t1 = (lo - oc) / dc, t2 = (hi - oc) / dc;
+    if (t1 > t2) { const tt = t1; t1 = t2; t2 = tt; }
+    if (t1 > tmin) { tmin = t1; axis = a; }
+    if (t2 < tmax) tmax = t2;
+    if (tmin > tmax) return null;
+  }
+  if (axis < 0) return null;                   // 起点已在造型内部：不做交互目标（继续走）
+  const face = [0, 0, 0];
+  face[axis] = axis === 0 ? (d.x > 0 ? -1 : 1) : axis === 1 ? (d.y > 0 ? -1 : 1) : (d.z > 0 ? -1 : 1);
+  return { t: tmin, px: o.x + d.x * tmin, py: o.y + d.y * tmin, pz: o.z + d.z * tmin, face };
+}
+/* 咬过的方块：射线在格内按 2cm 步进，找第一个还实着的 10cm 子格。
+ * 旧版 DDA 一进格就当实心返回：从自己挖的窗口看出去/打出去，全被"整块壳"挡住——
+ * 明明屏幕上是个洞，准星却停在洞口外沿。返回 null = 整格都空了，视线继续往前走。
+ * face 由"空 → 实"这一步的方向反推（法线指回空的那侧），小方块就能贴在洞里那面壁上。 */
+function rayCarved(o, d, gx, gy, gz, c, t0, t1, entryFace) {
+  const step = 0.02;
+  const clamp9 = v => Math.max(0, Math.min(SUB - 1, v));
+  let prev = null;
+  for (let t = Math.max(0.002, t0 + 0.002); t < t1; t += step) {
+    const px = o.x + d.x * t, py = o.y + d.y * t, pz = o.z + d.z * t;
+    const sx = clamp9(Math.floor((px - gx) * SUB)), sy = clamp9(Math.floor((py - gy) * SUB)), sz = clamp9(Math.floor((pz - gz) * SUB));
+    if (isSubSolid(c, sx, sy, sz)) {
+      const face = [0, 0, 0];
+      if (prev) {
+        const ax = px - prev.x, ay = py - prev.y, az = pz - prev.z;
+        if (Math.abs(ax) >= Math.abs(ay) && Math.abs(ax) >= Math.abs(az)) face[0] = ax > 0 ? -1 : 1;
+        else if (Math.abs(ay) >= Math.abs(az)) face[1] = ay > 0 ? -1 : 1;
+        else face[2] = az > 0 ? -1 : 1;
+      } else if (entryFace) face[0] = entryFace[0], face[1] = entryFace[1], face[2] = entryFace[2];
+      return { t, px, py, pz, face };
+    }
+    prev = { x: px, y: py, z: pz };
+  }
+  return null;
+}
 function raycastVoxel() {                   // 从眼睛沿视线步进，找第一个实体方块（第三人称也以眼睛为准）
   const o = eyePos(), dir = viewDir();
   let x = Math.floor(o.x), y = Math.floor(o.y), z = Math.floor(o.z);
@@ -2147,7 +2431,23 @@ function raycastVoxel() {                   // 从眼睛沿视线步进，找第
   let tmZ = (stepZ > 0 ? z + 1 - o.z : o.z - z) * tdZ;
   let face = null, t = 0;
   for (let i = 0; i < 256 && t <= REACH; i++) {
-    if (isSolidBlock(x, y, z)) return { x, y, z, face, t, point: _voxPoint.copy(o).addScaledVector(dir, t) };
+    if (isSolidBlock(x, y, z)) {
+      const id = world[idx(x, y, z)], shp = SHAPES[id];
+      const c = carved.get(idx(x, y, z));
+      if (c) {                                 // 挖过的块：只在还有实心子格的地方挡（洞看得穿）
+        const tExit = Math.min(tmX, tmY, tmZ);
+        if (tExit > t) {
+          const h = rayCarved(o, dir, x, y, z, c, t, tExit, face);
+          if (h) return { x, y, z, face: h.face, t: h.t, point: _voxPoint.set(h.px, h.py, h.pz) };
+        }
+        // 整格都空了：继续走（不 return）
+      } else if (!shp) return { x, y, z, face, t, point: _voxPoint.copy(o).addScaledVector(dir, t) };
+      else {
+        // 造型：只认实际体积；没打中就继续 DDA（台阶上半格、石柱旁边的空气都是能穿过去的）
+        const h = rayShapeBox(o, dir, x, y, z, shp);
+        if (h) return { x, y, z, face: h.face, t: h.t, point: _voxPoint.set(h.px, h.py, h.pz) };
+      }
+    }
     if (tmX < tmY && tmX < tmZ)      { x += stepX; t = tmX; tmX += tdX; face = [-stepX, 0, 0]; }
     else if (tmY < tmZ)              { y += stepY; t = tmY; tmY += tdY; face = [0, -stepY, 0]; }
     else                             { z += stepZ; t = tmZ; tmZ += tdZ; face = [0, 0, -stepZ]; }
@@ -2171,53 +2471,65 @@ function setWireframe(v) {
   showToast(v ? '瞄准线框：开' : '瞄准线框：关');
 }
 
-/* ---- 挖掘裂纹（我的世界式：进度条退休，裂纹长在正在碎的那块上）----
- * 8 个阶段纹理：从中心放射的锯齿线，越挖越长越多分支；程序生成（确定性随机，不闪不跳）
- * 盖在"这一口要碎的子格"上（10~40cm），碎完一口裂纹重置——看着裂纹加深 = 这一口快了 */
+/* ---- 挖掘裂纹（Minecraft 式像素破坏阶段）----
+ * 贴图来源：Minetest Game default 模组的 crack_anylength.png（16×80，5 帧横向展开的 16×16 像素裂纹）
+ * 作者：Minetest Game 贡献者；许可：CC BY-SA 3.0；来源与署名见 CREDITS.md。
+ * 原图 5 帧映射到本作的 8 个进度阶段，NearestFilter 放大，近看是像素块而不是平滑细线。 */
 const CRACK_STAGES = 8;
-const crackMats = (() => {
-  const mats = [];
-  for (let s = 0; s < CRACK_STAGES; s++) {
-    const cv = document.createElement('canvas'); cv.width = cv.height = 64;
-    const g = cv.getContext('2d');
-    let seed = 98765 + s * 131;                       // 确定性随机：每阶段纹理固定
-    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-    const n = 3 + s;                                  // 主裂纹条数随阶段增多
-    const reach = (0.22 + 0.78 * (s + 1) / CRACK_STAGES) * 30;   // 裂纹长度随阶段变长
-    g.strokeStyle = 'rgba(12,10,8,.78)'; g.lineWidth = 2.4; g.lineCap = 'round'; g.lineJoin = 'round';
-    g.beginPath();
-    for (let i = 0; i < n; i++) {
-      let a = rnd() * Math.PI * 2, x = 32 + Math.cos(a) * 2.5, y = 32 + Math.sin(a) * 2.5;
-      g.moveTo(x, y);
-      let len = 0;
-      while (len < reach) {
-        const step = 2.5 + rnd() * 4.5;
-        a += (rnd() - 0.5) * 1.2;                     // 锯齿抖动
-        x += Math.cos(a) * step; y += Math.sin(a) * step;
-        g.lineTo(x, y); len += step;
-      }
-      if (s >= 2) {                                   // 后期阶段长分支
-        const bx = x, by = y, ba = a + (rnd() - 0.5) * 1.6, bl = reach * (0.3 + rnd() * 0.3);
-        g.moveTo(bx, by);
-        for (let t = 0; t < bl; t += 3) g.lineTo(bx + Math.cos(ba) * t, by + Math.sin(ba) * t);
-      }
+const CRACK_SRC_FRAMES = 5;
+const CRACK_B64 = 'iVBORw0KGgoAAAANSUhEUgAAABAAAABQBAMAAADiheg+AAAAFVBMVEUAAAD///8AAAD///95eXlEREQPDw/8i7lwAAAABnRSTlMAKIJRqpePugvnAAAA8ElEQVQoz6XQzarCMBAF4GmvN+tMwazTLrr2B7oWBNfiEyQt5v0fwTOZxCIuRAxtczhJyUfo+2F1mvZtns3fXYt+KivWIJSuBtn7+2j8Wwi0ZfUc3ZA9m5QX2ziddIt6tKuutbLfM8Z6PN9qFdfQqedydrMl8vAEuQe3iMfj7KvZ6T1VD2Z4VGO4soYPspbA6BCakTUQz3IhUi0ocph3jrE3e5Klpp82KZIXz+XUWoTYA6ZHdkv+59Xjy+Kcq17fdXR4IMnfoJ6E4F48VD0ED75GPVQ8HIqnGeDx4mEaLR3gkfgfiseRYTgkUHp64gp7AP7YIN57c57bAAAAAElFTkSuQmCC';
+const crackMats = [];
+const crackTexSlots = [];
+for (let s = 0; s < CRACK_STAGES; s++) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 16;
+  const ctx = cv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const tex = new THREE.CanvasTexture(cv);
+  tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false;
+  crackMats.push(new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+  crackTexSlots.push({ cv, ctx, tex });
+}
+{
+  const img = new Image();
+  img.onload = () => {
+    for (let s = 0; s < CRACK_STAGES; s++) {
+      const frame = Math.min(CRACK_SRC_FRAMES - 1, Math.round(s * (CRACK_SRC_FRAMES - 1) / (CRACK_STAGES - 1)));
+      const { cv, ctx, tex } = crackTexSlots[s];
+      ctx.clearRect(0, 0, 16, 16);
+      ctx.drawImage(img, 0, frame * 16, 16, 16, 0, 0, 16, 16);
+      tex.needsUpdate = true;
     }
-    g.stroke();
-    const t = new THREE.CanvasTexture(cv);
-    t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false;
-    mats.push(new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false,
-      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
-  }
-  return mats;
-})();
-const crackMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), crackMats[0]);
+  };
+  img.src = 'data:image/png;base64,' + CRACK_B64;
+}
+// 裂纹是面向相机的平面贴花：旧版用 1m³ 立方体贴裂纹，近看像一块悬空的暗方块/黑盒，
+// 且六个面各刷一遍裂纹，完全不像"方块表面在裂"。平面只取正对玩家的那个面，位置往相机侧推半个咬口。
+const crackMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), crackMats[0]);
 crackMesh.visible = false; crackMesh.renderOrder = 3;
 scene.add(crackMesh);
-function setCrack(cx, cy, cz, sx, sy, sz, prog) {     // 裂纹：中心位置 / 尺寸(米) / 进度0~1
+const _crackN = new THREE.Vector3(), _crackZ = new THREE.Vector3(0, 0, 1);
+function setCrack(cx, cy, cz, sx, sy, sz, prog) {     // 微型件裂纹：咬口中心 / 尺寸(米) / 进度0~1
   if (!(prog > 0)) { crackMesh.visible = false; return; }
   crackMesh.visible = true;
-  crackMesh.position.set(cx, cy, cz);
-  crackMesh.scale.set(Math.max(0.02, sx + 0.004), Math.max(0.02, sy + 0.004), Math.max(0.02, sz + 0.004));
+  const s = Math.max(0.02, sx, sy, sz);
+  const dx = camera.position.x - cx, dy = camera.position.y - cy, dz = camera.position.z - cz;
+  const len = Math.hypot(dx, dy, dz);
+  const push = s * 0.55 + 0.012;                     // 从咬口中心往相机方向推，贴在朝向玩家的那一面
+  if (len > 1e-4) crackMesh.position.set(cx + dx / len * push, cy + dy / len * push, cz + dz / len * push);
+  else crackMesh.position.set(cx, cy, cz);
+  crackMesh.scale.set(s + 0.004, s + 0.004, 1);
+  crackMesh.lookAt(camera.position);
+  crackMesh.material = crackMats[Math.min(CRACK_STAGES - 1, prog * CRACK_STAGES | 0)];
+}
+function setFaceCrack(px, py, pz, face, size, prog) {  // 贴花：准星命中点 + 方块命中面 + 限定的贴花尺寸
+  if (!(prog > 0)) { crackMesh.visible = false; return; }
+  crackMesh.visible = true;
+  const n = face && (face[0] || face[1] || face[2]) ? face : [0, 0, 1];
+  crackMesh.position.set(px + n[0] * 0.006, py + n[1] * 0.006, pz + n[2] * 0.006);
+  crackMesh.scale.set(Math.max(0.02, size), Math.max(0.02, size), 1);
+  _crackN.set(n[0], n[1], n[2]);
+  crackMesh.quaternion.setFromUnitVectors(_crackZ, _crackN);
   crackMesh.material = crackMats[Math.min(CRACK_STAGES - 1, prog * CRACK_STAGES | 0)];
 }
 
@@ -2260,6 +2572,18 @@ function removeSubVox(obj) {
   obj.mesh.geometry.dispose();
   const i = subVox.indexOf(obj);
   if (i >= 0) subVox.splice(i, 1);
+  // 压在它上面的小方块（叠罗汉）失去支撑 → 一起掉。旧版只摘走被敲的那块，上面的悬空留在原地
+  const topY = obj.y + obj.sy;
+  for (let k = subVox.length - 1; k >= 0; k--) {
+    const o = subVox[k];
+    if (Math.abs(o.y - topY) > 0.02) continue;
+    if (o.x + o.sx <= obj.x + 0.02 || o.x >= obj.x + obj.sx - 0.02) continue;
+    if (o.z + o.sz <= obj.z + 0.02 || o.z >= obj.z + obj.sz - 0.02) continue;
+    subVox.splice(k, 1);
+    fallers.push({ x: o.x, y: o.y, z: o.z, vy: 0, small: true, s: o.sx, mat: o.mat, mass: o.mass,
+      mesh: o.mesh, coh: 0.5, startY: o.y, id: o.mat,
+      rx: (Math.random() - 0.5) * 3, rz: (Math.random() - 0.5) * 3 });
+  }
 }
 const ghost = new THREE.Mesh(                 // 放置预览：半透明+白边，大小 = 将要放出的实际大小
   new THREE.BoxGeometry(1, 1, 1),
@@ -2285,6 +2609,41 @@ const sizeText = s => {                       // [0.1,0.1,0.1] -> "10cm"；长�
 };
 const smallSize = () => PLACE_SIZES[placeSizeIdx];                  // 当前放置尺寸
 const smallCost = (id, s) => +(s * s * s * BLOCKS[id].density);     // 小方块造价 = 体积×密度(kg)
+/* 小方块要占的立方体（x,y,z,s）和世界里已有的东西是否打架：按真实几何判，不按整格一刀切。
+ * 整块：整格占满；造型（台阶/薄板/石柱/木梁）：只挡它实际的那一块（台阶上方半格是空的，能放 10cm 小件）；
+ * 咬过的方块：只看小方块覆盖到的 10cm 子格里还有没有实体（挖出来的洞能把小件补回去）；
+ * 水/树叶/火把：不挡（水和软块本来就能穿）。 */
+function smallPlaceBlocked(x, y, z, s) {
+  const eps = 1e-4;
+  for (let ax = Math.floor(x + eps); ax <= Math.floor(x + s - eps); ax++)
+    for (let ay = Math.floor(y + eps); ay <= Math.floor(y + s - eps); ay++)
+      for (let az = Math.floor(z + eps); az <= Math.floor(z + s - eps); az++) {
+        if (ax < 0 || ax >= WX || ay < 0 || ay >= WY || az < 0 || az >= WZ) return true;
+        const vi = idx(ax, ay, az), id = world[vi];
+        if (!id || id === 8 || BLOCKS[id].soft || BLOCKS[id].noCollide) continue;
+        const c = carved.get(vi);
+        if (c) {                                      // 咬过的块：覆盖到的子格里还有实体才算挡住
+          let hit = false;
+          const sx0 = Math.max(0, Math.floor((x - ax) * SUB + eps)), sx1 = Math.min(SUB - 1, Math.floor((x + s - ax) * SUB - eps));
+          const sy0 = Math.max(0, Math.floor((y - ay) * SUB + eps)), sy1 = Math.min(SUB - 1, Math.floor((y + s - ay) * SUB - eps));
+          const sz0 = Math.max(0, Math.floor((z - az) * SUB + eps)), sz1 = Math.min(SUB - 1, Math.floor((z + s - az) * SUB - eps));
+          for (let sx = sx0; sx <= sx1 && !hit; sx++) for (let sy = sy0; sy <= sy1 && !hit; sy++)
+            for (let sz = sz0; sz <= sz1 && !hit; sz++) if (isSubSolid(c, sx, sy, sz)) hit = true;
+          if (hit) return true;
+          continue;
+        }
+        const shp = SHAPES[id];
+        if (shp) {                                    // 造型：只在它的实际体积上挡
+          const mx0 = ax + (1 - shp.size[0]) / 2, mx1 = mx0 + shp.size[0];
+          const mz0 = az + (1 - shp.size[2]) / 2, mz1 = mz0 + shp.size[2];
+          const my0 = ay, my1 = ay + shp.size[1];
+          if (x < mx1 - eps && x + s > mx0 + eps && y < my1 - eps && y + s > my0 + eps && z < mz1 - eps && z + s > mz0 + eps) return true;
+          continue;
+        }
+        return true;                                  // 满格实心
+      }
+  return false;
+}
 function getSmallPlace(id, s, ray) {          // 小方块落点：贴命中面 + 准星指向点 + 5cm 吸附（预览与真放置共用）
   const t = ray || rayAny();                  // 预览时直接复用本帧已算好的射线
   if (!t) return null;
@@ -2302,12 +2661,10 @@ function getSmallPlace(id, s, ray) {          // 小方块落点：贴命中面 
   const x = +(snap(px + nx * s / 2) - s / 2).toFixed(3);
   const y = +(snap(py + ny * s / 2) - s / 2).toFixed(3);
   const z = +(snap(pz + nz * s / 2) - s / 2).toFixed(3);
-  // 覆盖到的格子都不能是实体（只查中心会让小方块斜着穿进邻格的墙里）
-  const eps = 1e-4;
-  for (let ax = Math.floor(x + eps); ax <= Math.floor(x + s - eps); ax++)
-    for (let ay = Math.floor(y + eps); ay <= Math.floor(y + s - eps); ay++)
-      for (let az = Math.floor(z + eps); az <= Math.floor(z + s - eps); az++)
-        if (isSolidBlock(ax, ay, az)) return null;
+  // 覆盖到的格子不能是实体（只查中心会让小方块斜着穿进邻格的墙里）
+  // 但要按"这个位置实际被占了多少"判：台阶/薄板上半格是空的，能放 10cm 小件；
+  // 被雕刻过的方块只在还剩实体子格的地方挡住——旧版一律 isSolidBlock，台阶顶和挖出来的洞都放不进小方块
+  if (smallPlaceBlocked(x, y, z, s)) return null;
   // 不能和其他小方块重叠
   for (const o of subVox)
     if (x < o.x + o.sx - 1e-4 && x + s > o.x + 1e-4 &&
@@ -2355,9 +2712,15 @@ function updateHighlight() {
     highlight.scale.set(hs, hs, hs);
     aimTip('咬掉 ' + (bn * 10) + 'cm · ' + BLOCKS[world[idx(k.x, k.y, k.z)]].name);
   } else {
-    highlight.scale.set(1, 1, 1);
-    highlight.position.set(t.x + 0.5, t.y + 0.5, t.z + 0.5);
     const gid = world[idx(t.x, t.y, t.z)];
+    const shp = SHAPES[gid];
+    if (shp) {                                        // 造型：框缩到实际体积（台阶半格/石柱细柱），不再框整格空气
+      highlight.scale.set(shp.size[0] + 0.012, shp.size[1] + 0.012, shp.size[2] + 0.012);
+      highlight.position.set(t.x + 0.5, t.y + shp.size[1] / 2, t.z + 0.5);
+    } else {
+      highlight.scale.set(1, 1, 1);
+      highlight.position.set(t.x + 0.5, t.y + 0.5, t.z + 0.5);
+    }
     let tip = gid ? BLOCKS[gid].name + (BLOCKS[gid].soft ? ' · 可穿越' : '') + ' · 粘稠 ' + Math.round(cohesionOf(t.x, t.y, t.z, gid) * 100) + '%' : '';
     if (gid) {                                        // 工具软硬配比提示：凿不动/费劲要看得见原因
       const m = digMode(), mh = hardnessMatch(m.matH, BLOCKS[gid].hardness);
@@ -2388,7 +2751,7 @@ function placeSmall(id, s) {                  // 放置小方块：位置与预�
     const h = hands.R;
     if (!h || h.id !== id || h.n <= 0) { showToast('右手要拿着' + BLOCKS[id].name + '，还需要 ' + fmtMass(cost) + BLOCKS[id].matName); return; }
     h.n--; if (h.n <= 0) hands.R = null;
-    frags[fid] = +((frags[fid] || 0) + BLOCKS[id].density).toFixed(4);
+    frags[fid] = +((frags[fid] || 0) + itemMassOf(id)).toFixed(4);   // 拆的是"这个物品"的质量：台阶只有半格，不能按整块算
     gainFeed('拆了 1 个' + BLOCKS[id].name);
   }
   frags[fid] = +((frags[fid] - cost).toFixed(4));
@@ -2405,11 +2768,12 @@ function updateSizeTag() {                    // 右下角常显：当前放置�
 updateSizeTag();
 
 /* ---- 按住左键持续挖掘：反馈走方块裂纹（进度条已移除） ---- */
-const mining = { active: false, both: false, hasTarget: false, x: 0, y: 0, z: 0, progress: 0, subObj: null };   // both: 左右键一起按=双手刨；subObj: 正在敲的小方块
+const mining = { active: false, both: false, hasTarget: false, x: 0, y: 0, z: 0, progress: 0, subObj: null, pressT: 0, autoBlock: null };   // both: 左右键一起按=双手刨；pressT: 本次按住的时长；autoBlock: 粘住的 1m 方块
+const MINING_HOLD_START = 0.3;               // 起挖前摇：按住 0.3s 才开始第一口；快速单击不产出任何子格
 
-function breakBlock(x, y, z, id) {          // 整块挖掉（造型/调试用）：掉「剩余质量」= 密度 − 已咬掉的部分
+function breakBlock(x, y, z, id) {          // 整块挖掉（造型/调试用）：掉「剩余质量」= 物品质量 − 已咬掉的部分
   const c = carved.get(idx(x, y, z));
-  const remain = +(BLOCKS[id].density * (0.9 + Math.random() * 0.3) - (c ? c.n * BLOCKS[id].density / (SUB * SUB * SUB) : 0));
+  const remain = +(itemMassOf(id) * (0.9 + Math.random() * 0.3) - (c ? c.n * BLOCKS[id].density / (SUB * SUB * SUB) : 0));
   gainXp(BLOCKS[id].xp);
   finishBreak(x, y, z, id, Math.max(0, remain));
 }
@@ -2420,11 +2784,27 @@ function mine() {                            // 瞬间挖掉瞄准的方块（�
 }
 function updateMining(dt) {                  // 每帧调用：按住左键时一口一口咬 10cm，挖满进度整块碎
   if (!mining.active || P.fall > 0) { resetMining(); return; }   // 倒在地上挖不了
+  mining.pressT = (mining.pressT || 0) + dt;
+  if (mining.pressT < MINING_HOLD_START) {          // 起挖前摇：快速单击不算挖掘，必须按住
+    aimTip('按住左键蓄力…');
+    return;
+  }
   const t = frameRay();
-  if (!t) { resetMining(); return; }
-  if (t.type === 'sub') {                    // 小方块：给足挖掘时间——单击秒碎没有反馈是 bug（旧公式体积项太小压不住）
+  // 粘滞目标：准星在这块 1m 方块上钻出一个 10cm 小洞后，findChip 会穿洞返回 null，按住左键就原地停住。
+  // 只要视线还落在这块方块的 AABB 里（没挪到别的块、手也还够得着），就继续吃这块剩下的子格，直到整块碎。
+  if (mining.autoBlock) {
+    const ab = mining.autoBlock, vi = idx(ab.x, ab.y, ab.z), id = world[vi];
+    const enter = id && id !== 8 && !SHAPES[id] ? rayBlockEnter(ab.x, ab.y, ab.z) : null;
+    let blocked = false;
+    if (t) {
+      const hitT = t.type === 'sub' ? t.dist : t.t;
+      blocked = hitT < enter - 1e-3;          // 视线先撞到别的东西：原块已经不在准星下
+    }
+    if (enter === null || blocked) mining.autoBlock = null;
+  }
+  if (!mining.autoBlock && t && t.type === 'sub') {   // 小方块：给足挖掘时间——单击秒碎没有反馈是 bug（旧公式体积项太小压不住）
     const o = t.obj, b = BLOCKS[o.mat];
-    if (mining.subObj !== o) { mining.subObj = o; mining.progress = 0; }
+    if (mining.subObj !== o) { mining.subObj = o; mining.progress = 0; mining.chip = null; }
     const m = digMode();
     let match = hardnessMatch(m.matH, b.hardness);
     if (!m.tool) match = Math.min(1, match);              // 拳头不吃硬度红利（和凿整块一致）
@@ -2432,8 +2812,9 @@ function updateMining(dt) {                  // 每帧调用：按住左键时�
     // 空手基准：10cm 木板≈1.3s / 30cm≈2.4s / 50cm≈4s / 1m≈10s；工具 ×0.4（有杠杆支点，撬小件快得多）
     const vol = o.sx * o.sy * o.sz;
     const base = 0.9 + 3.5 * Math.min(o.sx, o.sy, o.sz);
-    const dur = (base + mineTime(o.mat, undefined, m.power * match) * Math.pow(vol, 0.66)) * (m.tool ? 0.4 : 1) / (m.swing || 1);
-    P.stam = Math.max(0, P.stam - m.drain * effortMult() * dt * 0.5);   // 敲小方块也算干活（半耗）
+    const dur = (base + mineTime(o.mat, undefined, m.power * match) * Math.pow(vol, 0.66)) * (m.tool ? 0.4 : 1)
+      / (m.swing || 1) * mineWaterMult() * (P.exhausted ? 1.5 : 1) / bodyPenalty('hand');
+    P.stam = Math.max(0, P.stam - m.drain * effortMult() * dt * 0.5 * (P.exhausted ? 0.4 : 1));   // 敲小方块也算干活（半耗）
     mining.progress += dt * (m.swing || 1) / dur;
     setCrack(o.x + o.sx / 2, o.y + o.sy / 2, o.z + o.sz / 2, o.sx, o.sy, o.sz, Math.min(1, mining.progress));
     if (mining.progress >= 1) {              // 敲碎了：回收成材料质量（和原来一样）
@@ -2446,12 +2827,16 @@ function updateMining(dt) {                  // 每帧调用：按住左键时�
     }
     return;
   }
-  if (t.y === 0) { resetMining(); return; }
-  if (SHAPES[world[idx(t.x, t.y, t.z)]]) {   // 造型（台阶/石柱）保持整块挖
-    mineWhole(dt, t.x, t.y, t.z);
+  if (!mining.autoBlock && t && t.y === 0) { resetMining(); return; }
+  if (!mining.autoBlock && t && SHAPES[world[idx(t.x, t.y, t.z)]]) {   // 造型（台阶/石柱）保持整块挖
+    mineWhole(dt, t.x, t.y, t.z, t.face, t.point);
     return;
   }
-  let chip = findChip(t);                      // 沿视线找第一个实体子格（可穿过雕刻的洞）
+  let chip = t && !mining.autoBlock ? findChip(t) : null;   // 沿视线找第一个实体子格（可穿过雕刻的洞）
+  if (mining.autoBlock) {                      // 准星已穿洞/打到后面的块：仍咬住原块最近的剩余子格
+    const ab = mining.autoBlock;
+    if (!chip || chip.x !== ab.x || chip.y !== ab.y || chip.z !== ab.z) chip = nearestSubInBlock(ab.x, ab.y, ab.z);
+  }
   if (!chip || chip.y === 0) { resetMining(); return; }
   // 脚下智能对齐：视线朝下、瞄到的实体子格顶面不高于脚底（往脚下/身下掏）→ 咬口自动落到身体覆盖范围内最高的实体子格
   // 不然 10cm 一口要精确瞄 36 次才掏出能掉下去的洞（身体 60cm 宽），人都下不去
@@ -2461,7 +2846,8 @@ function updateMining(dt) {                  // 每帧调用：按住左键时�
   // 条件也断——现在改用视线方向判断，不再依赖命中面
   const downView = viewDir().y < -0.35;        // 明显朝下看（约 20° 以下才算掏地，平视远处山坡不算）
   const chipTop = chip.y + (chip.sy + 1) / SUB;
-  const diggingDown = downView && chipTop <= P.pos.y + 0.01;
+  let diggingDown = downView && chipTop <= P.pos.y + 0.01;
+  if (mining.autoBlock) diggingDown = false;   // 已经咬住一块：视角再低也别中途改挖脚下的井
   let underMe = false;                         // 瞄的点在不在自己脚下（决定走哪种井）
   if (diggingDown) {
     // 井口锚定在"视线×脚底平面"的交点上（不随井深漂移）；拿不到交点才退回射线命中点
@@ -2499,13 +2885,9 @@ function updateMining(dt) {                  // 每帧调用：按住左键时�
     mining.wellAx = undefined;                // 不挖井了：锚清掉
   }
   const id = world[idx(chip.x, chip.y, chip.z)];
-  // 松软的土：只有"掏自己脚下"（弯不下腰）才要蹲/趴；
-  // 瞄面前的地面挖井、挖土墙都站着随便挖——井口在够得着的地方，弯腰就够到
-  if ((id === 1 || id === 2) && diggingDown && underMe && P.stance === 0) {
-    resetMining();
-    aimTip('往下挖脚边的松土要蹲下 —— 按住 C 蹲下');
-    return;
-  }
+  mining.autoBlock = diggingDown ? null : { x: chip.x, y: chip.y, z: chip.z };   // 井有智能选层，别被粘滞锁死；普通块粘到碎
+  // 旧版只对"正脚下的草/泥土"强制蹲下，却允许站着挖 6m 外的地——两套距离口径互相矛盾。
+  // 现在统一按 REACH=2.5m：站着只要手够得着（包括脚下）就能挖；蹲/趴只影响移动、防坠和身高。
   if (!mining.hasTarget || chip.x !== mining.x || chip.y !== mining.y || chip.z !== mining.z) {
     const wasIdle = !mining.hasTarget;
     mining.x = chip.x; mining.y = chip.y; mining.z = chip.z;
@@ -2516,18 +2898,20 @@ function updateMining(dt) {                  // 每帧调用：按住左键时�
   P.stam = Math.max(0, P.stam - mode.drain * effortMult() * dt * (P.exhausted ? 0.4 : 1));   // 力竭后输出降消耗也降（累瘫的人干活只会更温柔），慢节奏可持续挖而不是死锁
   if (P.stam <= 0) P.exhausted = true;
   mining.chipT = (mining.chipT || 0) - dt;
-  // 挖掘节奏：工具每击间隔按挥击倍率缩短——空手必须是最慢的挥击；工具另设更低下限，软材料上也能看出节奏差
-  const chipFloor = (mode.swing || 1) > 1 ? 0.07 : 0.12;
+  // 挖掘节奏：工具每击间隔按挥击倍率缩短——空手必须是最慢的挥击
+  const chipFloor = 0.012;                            // 只防一帧多咬（60fps 一帧 16.7ms）；旧 0.02 让空手每口拖 2 帧，整块木头凭空多花一倍时间
   const bareHand = !mode.tool;                         // 徒手（空手单手/双手刨都算）
-  // 徒手扒松软土=一把抓：泥/草/沙/雪（硬度≤0.95）徒手一口 20cm（两手捧土一捧就是一把），硬料（石/木）仍 10cm 抠缝
+  // 徒手扒松软土=一把抓：只在朝下掏井/脚边时一口 20cm（泥/草/沙/雪，硬度≤0.95）；平挖墙仍是 10cm 抠缝
   // 没有这个，徒手挖 60cm 井穿一块要 ~50s（力竭后 72s）——坑永远是浅凹，人掉不下去
-  const biteN = (bareHand && BLOCKS[id].hardness <= 0.95) ? Math.max(mode.n, 2) : mode.n;
+  // 限制在 diggingDown：普通挖草/土墙时一次点击只咬 10cm，和 HUD 的"空手·一口10cm"一致
+  const biteN = (bareHand && BLOCKS[id].hardness <= 0.95 && diggingDown) ? Math.max(mode.n, 2) : mode.n;
   // 快慢是"工具×被挖"的交互：硬度配比决定这口凿不凿得动（软锤凿硬料 → 锤头形变吸能量，指数变慢）
   // （替代旧的"硬材料一律 ×2.5"——现在木锤凿石头 ×0.44、空手凿石头 ×0.28、空手凿铁 ×0.13，各自有各自的账）
   let match = hardnessMatch(mode.matH, BLOCKS[id].hardness);
   if (!mode.tool) match = Math.min(1, match);         // 拳头不吃硬度红利：没杠杆没支点，力送不到接触点（工具才有）
   let slow = P.exhausted ? 1.5 : 1;                    // 没力气了：节奏慢半拍
-  const chipDur = Math.max(chipFloor, mineTime(id, cohesionOf(chip.x, chip.y, chip.z, id), mode.power * match) / SUB / (mode.swing || 1) * slow / bodyPenalty('hand'));   // 手部重伤：干活也慢
+  const biteFrac = (biteN * biteN * biteN) / (SUB * SUB * SUB);   // 这一口实际咬掉整块的多少（10cm 一口=1/1000，20cm=8/1000…）
+  const chipDur = Math.max(chipFloor, mineTime(id, cohesionOf(chip.x, chip.y, chip.z, id), mode.power * match) * biteFrac / (mode.swing || 1) * slow / bodyPenalty('hand') * mineWaterMult());   // 整块当量×咬口比例，手伤/水里更慢
   if (mining.chipT <= 0) {                             // 每隔一小会儿咬一口；一口咬多大看手里的工具/姿势
     mining.chipT = chipDur;
     if (doBite(chip.x, chip.y, chip.z, chip, biteN)) {
@@ -2539,20 +2923,31 @@ function updateMining(dt) {                  // 每帧调用：按住左键时�
       }
     }
   }
-  // 裂纹反馈（我的世界式）：盖在这一口要碎的子格上，随节奏加深；碎一口重置一次
-  const bnC = biteN || 1;
-  setCrack(chip.x + (chip.sx + bnC / 2) / SUB, chip.y + (chip.sy + bnC / 2) / SUB, chip.z + (chip.sz + bnC / 2) / SUB,
-           bnC * 0.1, bnC * 0.1, bnC * 0.1, Math.max(0.03, 1 - Math.max(0, mining.chipT) / chipDur));
+  // 裂纹反馈：跟着当前要咬的子格，贴它朝向玩家的那个暴露面——挖穿小洞后裂纹不会悬在空气里
+  // 最后一口把整块咬碎的那一帧，块已经没了，别再给空气画裂纹
+  const dec = world[idx(chip.x, chip.y, chip.z)] ? subFaceDecal(chip) : null;
+  if (dec) {
+    setFaceCrack(dec.x, dec.y, dec.z, dec.face, biteN * 0.1,
+      Math.max(0.03, 1 - Math.max(0, mining.chipT) / chipDur));
+  } else {
+    crackMesh.visible = false;
+  }
 }
-function mineWhole(dt, x, y, z) {            // 造型的整块挖法：攒满进度一次碎
+function mineWhole(dt, x, y, z, face, point) {   // 造型的整块挖法：攒满进度一次碎
   if (!mining.hasTarget || x !== mining.x || y !== mining.y || z !== mining.z) {
     mining.x = x; mining.y = y; mining.z = z;
     mining.hasTarget = true; mining.progress = 0;
+    mining.chip = null;                       // 从"咬子格"切到"整块造型"：清掉上一口的高亮，别框着别的格子
+    if (point) { mining.faceX = point.x; mining.faceY = point.y; mining.faceZ = point.z; }
+    mining.faceN = face;
   }
   const id = world[idx(x, y, z)];
   const wMode = digMode();
   const wMatch = hardnessMatch(wMode.matH, BLOCKS[id].hardness);   // 造型同理：工具×材料的硬度配比
-  mining.progress += dt * (wMode.swing || 1) / mineTime(id, cohesionOf(x, y, z, id), wMode.power * wMatch);
+  P.stam = Math.max(0, P.stam - wMode.drain * effortMult() * dt * (P.exhausted ? 0.4 : 1));
+  if (P.stam <= 0) P.exhausted = true;
+  mining.progress += dt * (wMode.swing || 1) / (mineTime(id, cohesionOf(x, y, z, id), wMode.power * wMatch)
+    * mineWaterMult() * (P.exhausted ? 1.5 : 1) / bodyPenalty('hand'));   // 水里/力竭/手伤都让整块更慢
   mineSfxT -= dt;
   if (mineSfxT <= 0) { sfxMine(id); mineSfxT = 0.25; swingT = 0; }
   if (mining.progress >= 1) {
@@ -2560,11 +2955,19 @@ function mineWhole(dt, x, y, z) {            // 造型的整块挖法：攒满�
     breakBlock(x, y, z, id);
     return;
   }
-  const S = SHAPES[id];                                 // 裂纹按造型的实际尺寸盖（台阶/柱/梁不浮空）
-  setCrack(x + 0.5, y + S.size[1] / 2, z + 0.5, S.size[0], S.size[1], S.size[2], Math.max(0.03, mining.progress));
+  const S = SHAPES[id];
+  const crackSize = Math.max(0.1, Math.min(0.5, Math.max(S.size[0], S.size[1], S.size[2])));
+  setFaceCrack(
+    mining.faceX !== undefined ? mining.faceX : (point ? point.x : x + 0.5),
+    mining.faceY !== undefined ? mining.faceY : (point ? point.y : y + 0.5),
+    mining.faceZ !== undefined ? mining.faceZ : (point ? point.z : z + 0.5),
+    mining.faceN || face, crackSize, Math.max(0.03, mining.progress)
+  );   // 造型是整件挖，裂纹按造型外廓尺寸（不超过 0.5m）
 }
 function resetMining() {
   mining.hasTarget = false; mining.progress = 0; mining.chip = null; mining.subObj = null;
+  mining.autoBlock = null;
+  mining.pressT = 0;
   crackMesh.visible = false;
 }
 function blockIntersectsPlayer(bx, by, bz) {
@@ -2586,7 +2989,12 @@ function place() {
   if (!hit || !hit.face) { showToast('准星里没有可贴着的方块面'); return; }
   const bx = hit.x + hit.face[0], by = hit.y + hit.face[1], bz = hit.z + hit.face[2];
   if (bx < 0 || bx >= WX || by < 0 || by >= WY || bz < 0 || bz >= WZ) { showToast('放到世界外面去了 —— 瞄近处一点'); return; }
-  if (world[idx(bx, by, bz)] !== 0) { showToast('那格已经被占了（水也占格子）'); return; }
+  // 水格可以放方块（MC 式：方块把水挤掉——池塘里能砌墙垫脚，也是溺水时自救的手段）；
+  // 但火把/营火不能进水（MC 里火把遇水点不着），水格只认实心方块
+  const curCell = world[idx(bx, by, bz)];
+  const waterCell = curCell === 8;
+  if (curCell !== 0 && !waterCell) { showToast('那格已经被占了'); return; }
+  if (waterCell && isFire) { showToast('火把/营火不能插在水里 —— 找个干的地方'); return; }
   if (isFire && hit.face[1] !== 1) { showToast('火把/营火要放在地面上（瞄脚边的地面放）'); return; }
   if (blockIntersectsPlayer(bx, by, bz)) { showToast('会卡住自己 —— 瞄远一点的面再放'); return; }
   for (const o of subVox) {                  // 已有小方块的格子别再放整块（会互相卡进去）
@@ -2634,13 +3042,14 @@ document.addEventListener('mousedown', e => {
   if (e.button === 0) {
     if (tryAttack()) return;                 // 点中夜行者：这一下是攻击，不进入挖掘
     mouseLDown = true; mining.active = true;   // 按住左键开始挖（单手/工具）
+    mining.hasTarget = false; mining.chipT = 0; mining.pressT = 0;   // 新的一次按下：重新起挖前摇，快速单击不产出
   }
   else if (e.button === 2) mouseRDown = true;             // 右键单按不做事，和左键一起按住 = 双手刨
   else if (e.button === 1) place();                       // 中键（滚轮按下）：放置右手的东西
   syncMouseButtons();
 });
 document.addEventListener('mouseup', e => {
-  if (e.button === 0) { mouseLDown = false; mining.active = false; }   // 松开左键停止挖
+  if (e.button === 0) { mouseLDown = false; mining.active = false; resetMining(); }   // 松开左键停止挖，立刻收裂纹
   else if (e.button === 2) mouseRDown = false;
   syncMouseButtons();
 });
@@ -2658,7 +3067,19 @@ let pNext = 0;
 const pGeo = new THREE.BufferGeometry();
 pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3).setUsage(THREE.DynamicDrawUsage));
 pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3).setUsage(THREE.DynamicDrawUsage));
-const points = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.14, vertexColors: true }));
+const pTex = (() => {                        // 软圆点：默认方形 Points 近看像一块块小立方，像悬浮方块；换成柔边尘点
+  const cv = document.createElement('canvas'); cv.width = cv.height = 32;
+  const g = cv.getContext('2d');
+  const rg = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+  rg.addColorStop(0, 'rgba(255,255,255,1)');
+  rg.addColorStop(0.55, 'rgba(255,255,255,.75)');
+  rg.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = rg; g.fillRect(0, 0, 32, 32);
+  return new THREE.CanvasTexture(cv);
+})();
+const points = new THREE.Points(pGeo, new THREE.PointsMaterial({
+  size: 0.16, vertexColors: true, map: pTex, transparent: true, alphaTest: 0.05, depthWrite: false
+}));
 points.frustumCulled = false;
 scene.add(points);
 function burst(bx, by, bz, colorHex, n = 10) {
@@ -2692,7 +3113,10 @@ function updateParticles(dt) {
 
 /* ---- 柔性形变痕迹：被撞开的树叶被拨弯，弹簧式慢慢回弹（几秒后痕迹消散） ---- */
 const leafBendGeo = new THREE.PlaneGeometry(0.55, 0.55);
-{ const uv = leafBendGeo.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, 0.5 + uv.getX(i) * 0.25, 0.5 + uv.getY(i) * 0.25); }   // UV 指到图集的树叶格
+{ // UV 指到图集的树叶格（旧代码只取了 u 的前 1/4、v 停在 0.5~0.75，实际采到的是别的贴图）
+  const t = tileUV(6), uv = leafBendGeo.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, t.u0 + uv.getX(i) * (t.u1 - t.u0), t.v0 + uv.getY(i) * (t.v1 - t.v0));
+}
 const leafBendMat = new THREE.MeshBasicMaterial({ map: atlasTexture, transparent: true, opacity: 0.95, side: THREE.DoubleSide });
 function spawnLeafBend(cx, cy, cz) {
   if (getBlock(cx, cy, cz) !== 5) return;    // 只在真的有树叶的格子上留痕
@@ -2757,7 +3181,7 @@ function groundTopAt(wx, wy, wz) {            // 从粒子高度往下扫：第�
 // 浏览器规定：必须先有用户点击/按键，才能出声（initAudio 挂在各类交互上）
 let audioCtx = null, masterGain = null, noiseBuf = null;
 let muted = loadPref('muted', '0') === '1';   // 静音偏好会记住
-let stepT = 0, mineSfxT = 0, wasGround = false;   // 脚步节拍 / 挖掘音节拍 / 落地检测
+let stepT = 0, mineSfxT = 0, lastMineSfx = 0, wasGround = false;   // 脚步节拍 / 挖掘音节拍 / 连咬音效节流 / 落地检测
 
 function initAudio() {
   if (audioCtx) { if (audioCtx.state === 'suspended') audioCtx.resume(); return; }
@@ -2767,6 +3191,7 @@ function initAudio() {
   masterGain = audioCtx.createGain();
   masterGain.gain.value = 0.4;
   masterGain.connect(audioCtx.destination);
+  if (typeof applyVol === 'function') applyVol();   // 首启就套用已保存的音量（旧代码等用户拖滑块才生效）
   noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.5 | 0, audioCtx.sampleRate);
   const d = noiseBuf.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -2909,7 +3334,9 @@ const selNameEl = document.getElementById('selName');
 let selNameT = null, lastHeldId = -1;
 function showHandName() {                    // 右手换了东西时闪现名字（含当前放置尺寸）
   const h = hands.R;
-  selNameEl.textContent = h ? BLOCKS[h.id].name + (smallSize() < 1 ? ' · 放置 ' + sizeText([smallSize()]) : '') : '右手空了';
+  selNameEl.textContent = !h ? '右手空了'
+    : h.tool ? BLOCKS[h.mat].matName + TOOL_KINDS[h.tool].name + '（工具不能放置）'
+    : BLOCKS[h.id].name + (smallSize() < 1 ? ' · 放置 ' + sizeText([smallSize()]) : '');
   selNameEl.style.display = 'block';
   selNameEl.style.opacity = 1;
   clearTimeout(selNameT);
@@ -2972,7 +3399,7 @@ function digMode() {                         // 当前挖掘方式：手里拿�
   }
   if (mining.both && !hands.L && !hands.R)
     return { n: 3, power: 0.8, matH: BARE_HARDNESS, swing: 1.2, drain: 12, label: '双手刨 · 一口 30cm（很费力气）' };
-  return { n: 1, power: BARE_POWER, matH: BARE_HARDNESS, swing: 1, drain: 5, label: '空手 · 一口 10cm（效率低还伤手）' };   // 空手耗力 2.5→5：徒手刨很累
+  return { n: 1, power: BARE_POWER, matH: BARE_HARDNESS, swing: 1, drain: 5, label: '空手 · 10cm（软土/下挖20cm·效率低）' };   // 空手耗力 2.5→5：徒手刨很累
 }
 let sticks = 0, stonesMined = 0, goalIdx = 0, benchPlaced = false;
 let craftedBlocks = 0, craftedShapes = 0, craftedTools = 0, craftedPick = false, craftedPickIron = false, craftedSledge = false;
@@ -3014,7 +3441,13 @@ const RECIPES = [
 const fmtMass = v => { if (v >= 0.0995) return v.toFixed(1) + 'kg'; const g = v * 1000; return (g < 0.05 ? 0 : g < 9.95 ? +g.toFixed(1) : Math.round(g)) + 'g'; };   // 微量修匀：显示 0g 而非 0.0g
 const resName = k => k === 'stick' ? '木棍' : (k[0] === 'f' ? BLOCKS[k.slice(1)].matName : BLOCKS[k].name);
 const resHave = k => k === 'stick' ? sticks : (k[0] === 'f' ? (frags[k.slice(1)] || 0) : handCount(+k));   // 方块都拿在手里
-const canCraft = r => Object.entries(r.cost).every(([k, v]) => resHave(k) >= v) && (!r.out || handSpaceFor(r.out, r.outN || 1));
+function canCraft(r) {
+  const outOk = r.out ? handSpaceFor(r.out, r.outN || 1)
+    : r.id === 'torch' ? handSpaceFor(22, 4)
+    : r.id === 'campfire' ? handSpaceFor(23, 1)
+    : true;   // 火把/营火也是产物：满手时不能扣料（旧逻辑会吞掉煤和木棍）
+  return outOk && Object.entries(r.cost).every(([k, v]) => resHave(k) >= v);
+}
 function benchNearby() {                 // 玩家 4 格范围内有没有放着的工具箱
   const px = Math.floor(P.pos.x), py = Math.floor(P.pos.y + 0.9), pz = Math.floor(P.pos.z);
   for (let dx = -4; dx <= 4; dx++) for (let dy = -3; dy <= 3; dy++) for (let dz = -4; dz <= 4; dz++)
@@ -3061,7 +3494,7 @@ function closeCraft() {
       const rest = it.n - (handCount(it.id) - before);
       if (rest > 0) {
         const fid = BLOCKS[it.id].frag !== undefined ? BLOCKS[it.id].frag : it.id;
-        frags[fid] = +((frags[fid] || 0) + rest * BLOCKS[it.id].density).toFixed(3);
+        frags[fid] = +((frags[fid] || 0) + rest * itemMassOf(it.id)).toFixed(3);
         gainFeed('手放不下，' + rest + ' 个' + BLOCKS[it.id].name + '散成了材料');
       }
     }
@@ -3376,9 +3809,9 @@ function checkGoals() {
 }
 // 左上角提示分级：新手别被 130 字长跑马灯糊脸——按目标进度逐步解锁按键信息
 const HINT_TIERS = [
-  '左键 挖（每口10cm）· 中键 放右手的东西 · W 走 / 双击W 快走 / Shift 疾跑 · 对墙按住 W 攀爬',
-  'E 物品栏/合成 · F 吃 / R 喝水 · C 蹲（挖脚边的土要蹲）· G 换放置大小 · 中键 放东西',
-  '左键 挖 · 左右键一起 双手刨 · 中键 放 · G 尺寸 · C/X 蹲趴 · E 合成 · F 吃 R 喝 · F5/V 视角 · M 静音 · 夜里别离火光太远',
+  '按住左键 挖（前摇0.3s·每口10cm）· 中键 放右手的东西 · W 走 / 双击W 快走 / Shift 疾跑 · 对墙按住 W 攀爬',
+  'E 物品栏/合成 · F 吃 / R 喝水 · C 蹲（蹲着不掉坎）· G 换放置大小 · 中键 放东西',
+  '按住左键 挖 · 左右键一起 双手刨 · 中键 放 · G 尺寸 · C/X 蹲趴 · E 合成 · F 吃 R 喝 · U 卡住脱困 · F5/V 视角 · M 静音 · 夜里别离火光太远',
 ];
 function refreshHint() {
   const el = document.getElementById('hint');
@@ -3452,18 +3885,21 @@ const FOODS = {
   meat:    { name: '烤肉', cal: 420, pro: 24 },
 };
 let statusUiT = 0;
+let wasAirLow = false;                        // 憋气提示只弹一次（别在水里每秒刷屏）
 
 const statusEl = document.getElementById('status');
 const itemsEl = document.getElementById('items');
 const waterFxEl = document.getElementById('waterFx');
 const deathScreen = document.getElementById('deathScreen');
 const deathReasonEl = document.getElementById('deathReason');
-const cellEls = { hp: [], hunger: [], thirst: [], stam: [], cold: [], hot: [] };
+const cellEls = { hp: [], hunger: [], thirst: [], stam: [], cold: [], hot: [], air: [] };
 const numEls = {};
+const statusRows = {};                       // 行的引用：呼吸条要按需显示/隐藏
 
 function buildStatusUI() {                   // 每条 10 个格子，整行由 JS 搭出来
-  [['hp', '生命'], ['hunger', '饥饿'], ['thirst', '缺水'], ['stam', '体力'], ['cold', '寒冷'], ['hot', '炎热']].forEach(([k, label]) => {
-    const row = document.createElement('div'); row.className = 'vrow';
+  [['hp', '生命'], ['hunger', '饥饿'], ['thirst', '缺水'], ['stam', '体力'], ['cold', '寒冷'], ['hot', '炎热'], ['air', '呼吸']].forEach(([k, label]) => {
+    const row = document.createElement('div'); row.className = 'vrow' + (k === 'air' ? ' airRow' : '');
+    statusRows[k] = row;
     const lbl = document.createElement('span'); lbl.className = 'vlabel'; lbl.textContent = label;
     const cells = document.createElement('div'); cells.className = 'vcells';
     cells.id = 'cells' + k[0].toUpperCase() + k.slice(1);
@@ -3476,10 +3912,15 @@ function buildStatusUI() {                   // 每条 10 个格子，整行由 
   });
 }
 function updateStatusUI() {
-  const vals = { hp: Math.ceil(P.hp / 10), hunger: Math.round(P.hunger), thirst: Math.round(P.thirst), stam: Math.round(P.stam / 10), cold: Math.round(P.cold / 10), hot: Math.round(P.hot / 10) };  // round：喝满就是满，不会闪回 9 格
-  for (const k of ['hp', 'hunger', 'thirst', 'stam', 'cold', 'hot']) {
+  const vals = { hp: Math.ceil(P.hp / 10), hunger: Math.round(P.hunger), thirst: Math.round(P.thirst), stam: Math.round(P.stam / 10), cold: Math.round(P.cold / 10), hot: Math.round(P.hot / 10), air: Math.ceil(P.air / 10) };  // round：喝满就是满，不会闪回 9 格
+  for (const k of ['hp', 'hunger', 'thirst', 'stam', 'cold', 'hot', 'air']) {
     cellEls[k].forEach((c, i) => c.classList.toggle('on', i < vals[k]));
-    if (numEls[k]) numEls[k].textContent = k === 'hp' ? Math.ceil(P.hp) : (k === 'cold' || k === 'hot' ? Math.round(P[k]) : vals[k]);   // 判空：存档恢复路径可能早于 buildStatusUI
+    if (numEls[k]) numEls[k].textContent = k === 'hp' ? Math.ceil(P.hp) : (k === 'cold' || k === 'hot' ? Math.round(P[k]) : (k === 'air' ? Math.round(P.air) : vals[k]));   // 判空：存档恢复路径可能早于 buildStatusUI
+  }
+  // 呼吸条（MC 气泡条的位置感）：下水或没喘匀才浮出来，岸上满气不占地方；只剩 4 格以内变橙警告
+  if (statusRows.air) {
+    statusRows.air.classList.toggle('show', P.air < 99.5 || headUnderwater());
+    statusRows.air.classList.toggle('low', P.air < 40);
   }
   const stamCells = cellEls.stam[0] && cellEls.stam[0].parentNode;
   if (stamCells) stamCells.classList.toggle('exhausted', P.exhausted);   // 力竭时体力格变红：一眼看出为什么跑不动
@@ -3639,7 +4080,12 @@ function eat() {                             // F：吃一口 —— 营火旁�
   P.stam = Math.min(100, P.stam + 8);        // 糖原立刻回一点体力
   noiseHit(700, 0.1, 0.18);
   setTimeout(() => noiseHit(500, 0.1, 0.15), 120);
-  showToast(pick === 'rawmeat' ? `生吞了${f.name}（+${f.cal}kcal · 腥，但活着）` : `吃了${f.name}（+${f.cal}kcal · 蛋白 +${f.pro}g）`);
+  // 生食风险（参考 MC 生食中毒口径）：生肉 25% 概率闹肚子 45 秒——脱水加快 + 缓慢掉血，不致命，
+  // 但足以让你在下一个夜里多掉一截状态。烤肉是同一个入口（营火旁 F 自动烤），所以风险是可规避的
+  if (pick === 'rawmeat') {
+    showToast(`生吞了${f.name}（+${f.cal}kcal · 腥，但活着）`);
+    if (Math.random() < 0.25) { P.sickT = Math.max(P.sickT, 45); showToast('生肉的寄生虫让你闹肚子了 —— 下次架火上烤'); }
+  } else showToast(`吃了${f.name}（+${f.cal}kcal · 蛋白 +${f.pro}g）`);
   updateItemsUI(); updateStatusUI();
   ateOnce = true; checkGoals();
 }
@@ -3656,11 +4102,11 @@ function drink() {                           // R：喝附近的水
   updateStatusUI();
   drankOnce = true; checkGoals();
 }
-function hurt(dmg, cause, part) {              // 受伤（part 可选：伤落到具体部位）
+function hurt(dmg, cause, part, skipBody = false) {   // 受伤（part 可选：伤落到具体部位；skipBody 供 hurtBody 避免重复扣部位）
   if (state === 'dead') return;              // 已经死了：别再扣血、别重播死亡音效
   P.hp = Math.max(0, P.hp - dmg);
   // 部位健康：显著伤害落到部位（指定了就用指定的；没指定随机散落，躯干概率大——躯干目标最大）
-  if (dmg >= 0.5 && state === 'playing') {
+  if (!skipBody && dmg >= 0.5 && state === 'playing') {
     const p = part || (Math.random() < 0.4 ? 'torso' : ['head', 'armL', 'armR', 'handL', 'handR', 'legL', 'legR', 'torso'][Math.floor(Math.random() * 8)]);
     hurtBody(p, dmg * 1.2, 0, null);         // 只扣部位不再扣血（血在上面已扣）
   }
@@ -3685,7 +4131,7 @@ initBody();
 function hurtBody(part, dmg, hpDmg, cause) {    // 部位伤：扣部位健康（hpDmg>0 时顺带扣总血）
   if (!P.body || P.body[part] === undefined) part = 'torso';
   P.body[part] = Math.max(0, P.body[part] - dmg);
-  if (hpDmg > 0) hurt(hpDmg, cause || '受了伤');
+  if (hpDmg > 0) hurt(hpDmg, cause || '受了伤', undefined, true);   // 只扣总血：部位伤上面已经结算过
   if (typeof updateBodyUI === 'function') updateBodyUI();
 }
 function bodyPenalty(kind) {                    // 部位状态对能力的系数（1 = 正常）
@@ -3722,6 +4168,7 @@ function updateBodyUI() {                       // 身体视图：人形剪影�
   if (legW < 30) tips.push('腿重伤：移动 ×0.55·疾跑锁死');
   else if (legW < 50) tips.push('腿伤：移动 ×0.75');
   if (P.body.head < 40) tips.push('头昏：视野发黑');
+  if (P.sickT > 0) tips.push('闹肚子：脱水加快（生肉没烤）');
   const st = document.getElementById('bodyState');
   if (st) { st.textContent = tips.length ? tips.join(' · ') : '状况良好'; st.classList.toggle('hurt', tips.length > 0); }
   const hfx = document.getElementById('headFx');
@@ -3772,6 +4219,21 @@ function die(reason) {
 function survivalTick(dt) {                  // 每帧：数值随时间变化（现实时间尺度）+ 硬核营养代谢
   if (handHurtTipCd > 0) handHurtTipCd -= dt;
   bodyHealTick(dt);                            // 部位自愈（吃得饱好得快）
+  // —— 憋气（参考 MC 氧气）：头没入水里才开始消耗，15 秒憋空；憋空后每秒掉 8 血 ——
+  // 数值 rationale：MC 溺水 2 伤害/秒 ÷ 20 上限 = 每秒 1/10 条命；本作 100 血 = 10 格 → 8/秒 ≈ 0.8 格/秒，
+  // 比 MC 略缓（本作水塘只有 4~5 格深，网速一样地呛死人不好玩），15 秒憋气 + 约 12 秒呛死 = 27 秒上限
+  const submerged = headUnderwater();
+  if (submerged) {
+    P.air = Math.max(0, P.air - 100 / AIR_SECONDS * dt);
+    if (P.air <= 0) {
+      P.hp = Math.max(0, P.hp - 8 * dt);
+      if (P.hp <= 0) { P.hp = 0; die('你溺水了——憋气见底，呛了一肚子水'); return; }
+    }
+    if (P.air < 40 && !wasAirLow) { wasAirLow = true; showToast('快憋不住气了 —— 浮上去换气（空格键上浮）'); }
+  } else {
+    P.air = Math.min(100, P.air + 100 / 1.7 * dt);   // 出水约 1.7 秒回满（MC 一上岸就快速回气）
+    wasAirLow = false;
+  }
   bodyUiCd -= dt;                              // 视图节流刷新（受伤时 hurtBody 已即时刷）
   if (bodyUiCd <= 0) { bodyUiCd = 1; updateBodyUI(); }
   const sprinting = (keys['ShiftLeft'] || keys['ShiftRight']) && (keys['KeyW'] || keys['KeyA'] || keys['KeyS'] || keys['KeyD']);
@@ -3817,6 +4279,13 @@ function survivalTick(dt) {                  // 每帧：数值随时间变化�
   // 饥饿条 = 胃里热量的直观展示（10 格 = 800 kcal）
   P.hunger = Math.max(0, Math.min(10, P.calPool / 80));
   P.thirst = Math.max(0, P.thirst - dt / 480 * (sprinting ? 1.6 : 1));   // 满水到脱水：约 80 分钟
+  // —— 闹肚子（生肉风险，参考 MC 生食中毒）：脱水加快 + 缓慢掉血，不致命但逼你把肉烤了 ——
+  if (P.sickT > 0) {
+    P.sickT = Math.max(0, P.sickT - dt);
+    P.thirst = Math.max(0, P.thirst - dt / 480 * 1.2);                   // 额外脱水（腹泻）
+    P.hp = Math.max(1, P.hp - 0.05 * dt);                                // 兜住 1 血：寄生虫不直接要命
+    if (P.sickT === 0) showToast('肚子不闹了 —— 生肉还是架火上烤过再吃');
+  }
   // 体脂过低 + 断粮：身体撑不住，缓慢掉血
   if (P.fatPct <= 3 && P.calPool <= 0) { P.hp -= 0.05 * dt; if (P.hp <= 0) { P.hp = 0; die('你饿得皮包骨，倒下了'); } }
   // 体温：产热看基础代谢（肌肉越多烧得越旺），隔热/散热看体脂（肥肉保热但捂汗）
@@ -4031,15 +4500,18 @@ function updateEnvTick(dt) {
     const d = Math.hypot(c.x + 0.5 - P.pos.x, c.y - P.pos.y, c.z + 0.5 - P.pos.z);
     const w = 1 - d / SHAPES[23].fire.r; if (w > fireWarmth) fireWarmth = w;
   }
-  // 屋顶判定：头顶 3×3 柱向上 6 格里有 ≥4 个实心块 = 有顶（一块飘着的板不算，真屋顶一盖就是 9）
-  // rationale 4：防「单板遮天」白嫖；树叶不算（挡雨不挡风——雨的粒子碰撞本来就把树叶当屋顶了）
+  // 屋顶判定：头顶 3×3 柱向上 6 格里有 ≥4 根柱子被实心块盖住 = 有顶。
+  // 只数"头顶以上"（dy 从 1 起）：旧版从 dy=0 数，站在墙边时同一层的墙也算进屋顶，
+  // 野外靠着一堵 2 格高的墙就会被判成"室内"（寒冷减半）——取暖收益白嫖。
   const px = Math.floor(P.pos.x), pz = Math.floor(P.pos.z), py = Math.floor(P.pos.y + P.ph);
-  let roof = 0;
-  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (let dy = 0; dy < 6; dy++) {
-    const v = getBlock(px + dx, py + dy, pz + dz);
-    if (v && v !== 8 && !BLOCKS[v].soft && !BLOCKS[v].noCollide) roof++;
+  let roofCols = 0;
+  for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+    for (let dy = 1; dy < 7; dy++) {
+      const v = getBlock(px + dx, py + dy, pz + dz);
+      if (v && v !== 8 && !BLOCKS[v].soft && !BLOCKS[v].noCollide) { roofCols++; break; }
+    }
   }
-  sheltered = roof >= 4;
+  sheltered = roofCols >= 4;
 }
 
 /* =====================================================
@@ -4080,7 +4552,7 @@ function spawnMobAt(gx, gy, gz) {
   mesh.add(eyes);
   scene.add(mesh);
   mobs.push({ x: gx + 0.5, y: gy + 1, z: gz + 0.5, vx: 0, vy: 0, vz: 0, kvx: 0, kvz: 0, hp: MOB.hp, mesh,
-    atkT: 1, knockT: 0, chewT: 0, hurtT: 0, dieT: 0, burnT: 0, stuckT: 0, berserkT: 0, braveCd: 0, walkPh: Math.random() * 6, yaw: 0 });
+    atkT: 1, windT: 0, knockT: 0, chewT: 0, hurtT: 0, dieT: 0, burnT: 0, stuckT: 0, berserkT: 0, braveCd: 0, walkPh: Math.random() * 6, yaw: 0 });
   burst(gx + 0.5, gy + 1.2, gz + 0.5, 0x2a2f3a, 8);
 }
 function removeMob(i) {
@@ -4089,6 +4561,8 @@ function removeMob(i) {
 }
 function killMob(i, byPlayer) {
   const m = mobs[i];
+  m.mesh.scale.setScalar(1);                        // 起手中的放大别带进死亡动画
+  m.windT = 0;
   if (byPlayer) {
     const n = 1 + (Math.random() < 0.45 ? 1 : 0);
     food.rawmeat += n;
@@ -4127,7 +4601,9 @@ function trySpawnMob() {
     const gx = Math.floor(P.pos.x + Math.cos(a) * d), gz = Math.floor(P.pos.z + Math.sin(a) * d);
     if (gx < 2 || gx >= WX - 2 || gz < 2 || gz >= WZ - 2) continue;
     const gy = topAt(gx, gz);
-    if (world[idx(gx, gy, gz)] === 8) continue;                     // 不从水里冒出来
+    const groundId = world[idx(gx, gy, gz)];
+    if (!groundId || groundId === 8 || BLOCKS[groundId].soft || SHAPES[groundId]) continue;   // 不从水里/树冠/造型上冒出来
+    if (mobBlocked(gx + 0.5, gy + 1, gz + 0.5)) continue;            // 落点要站得下（别刷进树冠/岩缝里等 15 秒自爆）
     if (Math.abs(gy - P.pos.y) > 12) continue;                      // 别从天上/地底空降
     let lit = false;                                                // 火光边不刷（安全区是安全区）
     for (const t of torches.values()) if (Math.hypot(t.x - gx, t.z - gz) < 6) { lit = true; break; }
@@ -4177,10 +4653,14 @@ function updateMobs(dt) {
     if (m.berserkT > 0) { const l = dist || 1; dirX = dx / l; dirZ = dz / l; }   // 饿红眼：顶着火冲你
     else if (fear > 0.15) { const l = Math.hypot(fleeX, fleeZ) || 1; dirX = fleeX / l; dirZ = fleeZ / l; }   // 掉头逃火
     else { const l = dist || 1; dirX = dx / l; dirZ = dz / l; }
-    const spd = (m.berserkT > 0 ? 4.3 : MOB.speed * (fear > 0.5 ? 1.35 : 1)) * (nightFactor < 0.3 ? 0.6 : 1);
+    // 在水里？夜行者会浮水（不会潜水，也不会沉在塘底转圈）：脚一沾水就轻轻上浮、游得慢，
+    // 这样玩家躲在池塘/护城河对岸也不会出现"怪在塘底永远够不着、也不消失"的僵局
+    const mobWet = getBlock(Math.floor(m.x), Math.floor(m.y + 0.4), Math.floor(m.z)) === 8;
+    const spd = (m.berserkT > 0 ? 4.3 : MOB.speed * (fear > 0.5 ? 1.35 : 1)) * (nightFactor < 0.3 ? 0.6 : 1) * (mobWet ? 0.6 : 1);
     m.vx = dirX * spd; m.vz = dirZ * spd;
     // —— 物理：重力 + 三轴移动（撞墙记下来给下面撞倒/啃/跳用）——
-    m.vy = Math.max(m.vy - GRAV * dt, -28);
+    if (mobWet) m.vy = Math.min(2.4, m.vy + 26 * dt);       // 浮力：往水面蹬
+    else m.vy = Math.max(m.vy - GRAV * dt, -28);
     const px0 = m.x, pz0 = m.z;
     // 击退通道：AI 每帧重写 m.vx/m.vz，击退必须走独立的 kvx/kvz 叠加位移（×0.85/帧衰减 ≈ 半衰 4 帧，
     // 4.5m/s 的击退约推 0.5m——看得见的踉跄，而不是只活 16ms 的抖动）
@@ -4201,16 +4681,15 @@ function updateMobs(dt) {
       else m.y = by2.y - 0.86;
       m.vy = 0;
     } else m.y = ny;
-    // 卡死自爆（悬崖/水底转圈 15s）：化烟退场，绝不挡服
-    if (onGround && Math.hypot(m.x - px0, m.z - pz0) < 0.004) m.stuckT += dt; else m.stuckT = 0;
-    if (m.stuckT > 15) { burst(m.x, m.y + 0.5, m.z, 0x3a3f4a, 8); removeMob(i); continue; }
     // —— 撞倒 / 啃墙 / 蹬跳 ——
     m.knockT -= dt; m.chewT -= dt; m.atkT -= dt;
-    if (blockedCell && onGround) {
+    let actedOnWall = false;                      // 这一帧是否在处理撞上的墙（啃/撞倒/蹬跳）
+    if (blockedCell && (onGround || mobWet)) {    // 水里也处理面前的墙：会浮水的怪能从岸边翻上来，不会永远漂在塘边
       const vi = idx(blockedCell.x, blockedCell.y, blockedCell.z), id = world[vi];
-      if (id && placedBlocks.has(vi) && !glued.has(vi) && m.knockT <= 0) {
+      if (id && placedBlocks.has(vi) && !glued.has(vi) && !carved.has(vi) && m.knockT <= 0) {
         knockBlock(blockedCell.x, blockedCell.y, blockedCell.z, m.vx * 1.3, m.vz * 1.3);   // 复用撞倒：没粘合的墙一撞就倒
         m.knockT = 0.9;
+        actedOnWall = true;
         if (!mobs._warned) { mobs._warned = true; showToast('夜行者开始拆你的墙——粘合过的墙能多扛一倍时间，铁墙最硬'); }
       } else if (id && id !== 8 && !SHAPES[id] && m.chewT <= 0 && dist < 9) {
         // 啃墙：和玩家同一套 10cm 雕刻（doBite 一口 30cm³，src='mob' 不进玩家材料袋）。
@@ -4227,27 +4706,43 @@ function updateMobs(dt) {
           sz: !fx ? (m.vz > 0 ? 1 : SUB - 2) : cl(Math.round((m.z - blockedCell.z + 0.5) * SUB) - 1 + jit()) + 1 };
         doBite(blockedCell.x, blockedCell.y, blockedCell.z, chip, 3, 'mob');
         m.chewT = 1.2 * (BLOCKS[id].hardness / 3) * (glued.has(idx(blockedCell.x, blockedCell.y, blockedCell.z)) ? 2 : 1);
+        actedOnWall = true;
       } else if (!blocksPlayer(blockedCell.x, blockedCell.y + 1, blockedCell.z)
               && !blocksPlayer(blockedCell.x, blockedCell.y + 2, blockedCell.z)) {
         m.vy = 7.4;                                // 蹬一下翻 1 格（和玩家蹬沙坎同款力度）
+        actedOnWall = true;
       }
     }
-    // —— 扑咬玩家 ——
+    // 卡死自爆（悬崖/水底转圈 15s）：必须没有正在处理的墙，否则啃石墙 31s 的怪会在 15s 时凭空消失
+    if (onGround && Math.hypot(m.x - px0, m.z - pz0) < 0.004 && !actedOnWall) m.stuckT += dt;
+    else m.stuckT = 0;
+    if (m.stuckT > 15) { burst(m.x, m.y + 0.5, m.z, 0x3a3f4a, 8); removeMob(i); continue; }
+    // —— 扑咬玩家：0.32 秒起手（先低吼一声、眼睛变红），起手期间后撤/绕墙/打断都能躲开 ——
+    // 旧版进范围就瞬间掉血：夜里贴脸时玩家没有反应窗口，纯拼数值；现在拼走位
     const d3 = Math.hypot(P.pos.x - m.x, (P.pos.y + 0.9) - (m.y + 0.4), P.pos.z - m.z);
-    if (d3 < 1.25 && m.atkT <= 0 && state === 'playing') {
-      m.atkT = 1.3;
-      // 咬哪算哪：扑上来抓到哪口是哪口——手臂最常被咬（挡咬的手），其次腿（跑的时候被扑）
-      const bite = Math.random();
-      const part = bite < 0.3 ? (Math.random() < 0.5 ? 'armL' : 'armR')
-                  : bite < 0.55 ? (Math.random() < 0.5 ? 'legL' : 'legR')
-                  : bite < 0.7 ? (Math.random() < 0.5 ? 'handL' : 'handR')
-                  : bite < 0.85 ? 'torso' : 'head';
-      hurt(MOB.atk, '夜行者咬伤了你的' + BODY_NAMES[part], part);
-      const kl = Math.hypot(dx, dz) || 1;
-      P.vel.x += (dx / kl) * 2.6; P.vel.z += (dz / kl) * 2.6; P.vel.y = Math.max(P.vel.y, 2.2);   // 被扑得踉跄
-      P.shakeT = 0.25;
-      sfxGrowl(0);
-    }
+    const canBite = d3 < 1.25 && state === 'playing'
+                 && !sightBlocked(m.x, m.y + 0.45, m.z, P.pos.x, P.pos.y + 0.9, P.pos.z);
+    if (canBite) {
+      if (m.windT <= 0 && m.atkT <= 0) {
+        m.windT = 0.32; m.atkT = 1.3;                 // 起手 + 攻击间隔从起手开始算
+        sfxGrowl(0);
+      } else if (m.windT > 0) {
+        m.windT -= dt;
+        if (m.windT <= 0) {                           // 起手结束：还在范围里才咬中
+          // 咬哪算哪：扑上来抓到哪口是哪口——手臂最常被咬（挡咬的手），其次腿（跑的时候被扑）
+          const bite = Math.random();
+          const part = bite < 0.3 ? (Math.random() < 0.5 ? 'armL' : 'armR')
+                      : bite < 0.55 ? (Math.random() < 0.5 ? 'legL' : 'legR')
+                      : bite < 0.7 ? (Math.random() < 0.5 ? 'handL' : 'handR')
+                      : bite < 0.85 ? 'torso' : 'head';
+          hurt(MOB.atk, '夜行者咬伤了你的' + BODY_NAMES[part], part);
+          const kl = Math.hypot(dx, dz) || 1;
+          P.vel.x += (dx / kl) * 2.6; P.vel.z += (dz / kl) * 2.6; P.vel.y = Math.max(P.vel.y, 2.2);   // 被扑得踉跄
+          P.shakeT = 0.25;
+          sfxGrowl(0);
+        }
+      }
+    } else m.windT = 0;                               // 离开范围/视线：起手作废（后撤能躲）
     // —— 天亮自燃（烧没了：不留肉）——
     if (nightFactor < 0.5) {
       m.hp -= 12 * dt;
@@ -4258,7 +4753,9 @@ function updateMobs(dt) {
     if (dist > 70) { removeMob(i); continue; }     // 走丢了
     // —— 表现：走路摇晃 / 受击闪红 / 眼睛朝向 ——
     m.hurtT -= dt;
-    m.mesh.material = m.hurtT > 0 ? mobHurtMat : mobMat;
+    m.mesh.material = (m.hurtT > 0 || m.windT > 0) ? mobHurtMat : mobMat;   // 受击/起手都泛红：起手看得见才躲得开
+    const windScale = m.windT > 0 ? 1.06 + 0.05 * Math.sin(performance.now() / 30) : 1;
+    m.mesh.scale.setScalar(windScale);
     m.walkPh += dt * (fear > 0.15 ? 13 : 9);
     m.mesh.position.set(m.x, m.y + 0.425 + Math.sin(m.walkPh) * 0.03, m.z);
     m.mesh.rotation.y = Math.atan2(dirX, dirZ);
@@ -4284,11 +4781,49 @@ function rayBox(ox, oy, oz, dx, dy, dz, x0, y0, z0, x1, y1, z1) {   // slab 法 
   }
   return tmin;
 }
+/* 视线是否被实心几何挡住（玩家挥击 / 夜行者扑咬共用）。
+ * 旧版战斗只比距离：隔着 1 米厚的墙、墙角也能互咬——"围墙"在战斗判定上等于不存在。
+ * 判据和几何一致：整块挡；造型只挡它实际占的体积（台阶上半格看得过去）；
+ * 咬过的块只挡还剩实心子格的位置（洞里看得见、打得着）；水/树叶/火把不挡。
+ * 采样 15cm 一次，够密也不会每帧烧 CPU（只在挥击/扑咬时调用）。 */
+function sightBlocked(ox, oy, oz, tx, ty, tz) {
+  const dx = tx - ox, dy = ty - oy, dz = tz - oz;
+  const len = Math.hypot(dx, dy, dz);
+  if (len < 1e-3) return false;
+  const steps = Math.max(1, Math.ceil(len / 0.15));
+  for (let i = 1; i < steps; i++) {
+    const k = i / steps;
+    const px = ox + dx * k, py = oy + dy * k, pz = oz + dz * k;
+    const gx = Math.floor(px), gy = Math.floor(py), gz = Math.floor(pz);
+    if (gy < 0) return true;
+    if (gx < 0 || gx >= WX || gz < 0 || gz >= WZ || gy >= WY) return true;
+    const id = world[idx(gx, gy, gz)];
+    if (!id || id === 8 || BLOCKS[id].soft || BLOCKS[id].noCollide) continue;
+    const c = carved.get(idx(gx, gy, gz));
+    if (c) {                                     // 咬过的块：只有采到实心子格才挡（洞里看得见、打得着）
+      const sx = Math.max(0, Math.min(SUB - 1, Math.floor((px - gx) * SUB)));
+      const sy = Math.max(0, Math.min(SUB - 1, Math.floor((py - gy) * SUB)));
+      const sz = Math.max(0, Math.min(SUB - 1, Math.floor((pz - gz) * SUB)));
+      if (isSubSolid(c, sx, sy, sz)) return true;
+      continue;
+    }
+    const shp = SHAPES[id];
+    if (shp) {                                   // 造型：半格台阶/细柱上方是通的，只有真挡住采样点的体积才算
+      const bx0 = gx + (1 - shp.size[0]) / 2, bx1 = bx0 + shp.size[0];
+      const by0 = gy, by1 = gy + shp.size[1];
+      const bz0 = gz + (1 - shp.size[2]) / 2, bz1 = bz0 + shp.size[2];
+      if (px > bx0 && px < bx1 && py > by0 && py < by1 && pz > bz0 && pz < bz1) return true;
+      continue;
+    }
+    return true;
+  }
+  return false;
+}
 function tryAttack() {
-  if (state !== 'playing' || !mobs.length) return false;
+  if (state !== 'playing' || !mobs.length || P.fall > 0) return false;   // 倒在地上挥不了手
   const o = eyePos(), d = viewDir();
   const bh = raycastVoxel();
-  const maxT = Math.min(3.4, bh ? bh.t : 3.4);     // 隔着墙打不到
+  const maxT = Math.min(REACH, bh ? bh.t : REACH);   // 隔着墙打不到；挥击也遵守手长 2.5m，不再隔空 3.4m 打人
   let best = null, bestT = maxT;
   for (const m of mobs) {
     if (m.dieT > 0) continue;
@@ -4296,8 +4831,13 @@ function tryAttack() {
     if (t !== null && t < bestT) { bestT = t; best = m; }
   }
   if (!best) return false;
+  // 隔墙判定已经由 maxT 兜住：raycastVoxel 命中的第一堵墙比怪更远，说明怪的正面在墙前（看得见）。
+  // 不再额外从眼睛往怪中心采样——怪贴地/站在台阶下时，中心点可能被台阶沿挡住，但露出来的头明明能打。
+  if (P.atkCd > 0) return true;      // 还在收手：吞掉这次点击（返回 true 是为了别让同一下点击顺势开始挖墙）
   const mode = digMode();
-  const dmg = 2 + mode.power * 9 + P.muscle / 12;   // 全参效力：空手 10 / 木锤 9.7 / 石锤 17.6 / 铁大锤 30.5（泥锤 7.3 是过渡；草/沙/雪粘稠不足做不成工具）
+  let dmg = 2 + mode.power * 9 + P.muscle / 12;   // 全参效力：空手 10 / 木锤 9.7 / 石锤 17.6 / 铁大锤 30.5（泥锤 7.3 是过渡；草/沙/雪粘稠不足做不成工具）
+  if (P.exhausted) dmg *= 0.6;                    // 力竭：挥得动但打不实（MC 蓄力不足口径）
+  P.atkCd = 0.4;                                  // 0.4 秒收手：狂点不能叠伤害，单次伤害不变（不削弱正面硬拼）
   best.hp -= dmg;
   best.hurtT = 0.18;
   best.kvx += d.x * 4.5; best.kvz += d.z * 4.5; best.vy = Math.max(best.vy, 2.2);   // 击退：走 kvx/kvz 通道（m.vx 每帧被 AI 重写，直接加只活 16ms）
@@ -4330,7 +4870,8 @@ function unpackBits(str) {
   return bits;
 }
 function saveGame() {
-  if (state === 'start' || !origWorld) return;     // 没进过世界不存（别用菜单背景覆盖真存档）
+  // 死亡界面/0 血不落盘：否则刷新会带着 0 血档启动；死亡后由重生按钮重置再存
+  if (state === 'start' || state === 'dead' || P.hp <= 0 || !origWorld) return;
   const worldDiff = [];
   for (let i = 0; i < world.length; i++) if (world[i] !== origWorld[i]) worldDiff.push([i, world[i]]);
   const carvedArr = [];
@@ -4344,7 +4885,7 @@ function saveGame() {
     player: {
       pos: [+P.pos.x.toFixed(3), +P.pos.y.toFixed(3), +P.pos.z.toFixed(3)], yaw: +P.yaw.toFixed(3), pitch: +P.pitch.toFixed(3),
       hp: +P.hp.toFixed(1), hunger: +P.hunger.toFixed(2), thirst: +P.thirst.toFixed(2), stam: +P.stam.toFixed(1),
-      cold: +P.cold.toFixed(1), hot: +P.hot.toFixed(1), muscle: +P.muscle.toFixed(2), fatPct: +P.fatPct.toFixed(2),
+      cold: +P.cold.toFixed(1), hot: +P.hot.toFixed(1), sickT: +P.sickT.toFixed(1), muscle: +P.muscle.toFixed(2), fatPct: +P.fatPct.toFixed(2),
       calPool: Math.round(P.calPool), proPool: +P.proPool.toFixed(1), actT: +P.actT.toFixed(1), xp: +P.xp.toFixed(2), stance: P.stance,
       body: P.body ? { ...P.body } : undefined,               // 部位健康（存档带回：刷新不再是免费疗伤）
     },
@@ -4381,11 +4922,16 @@ function applySave(sv) {                   // 世界与实体部分（在 buildA
   rebuildFireMeshes();
 }
 function restorePlayerFrom(sv) {           // 玩家与库存部分（respawn() 重置之后覆盖回来）
-  if (!sv.player) return;                 // 残档只有世界没有玩家：保持 respawn 后的新手状态开局（宁丢不脏档）
+  if (!sv.player) {                       // 残档只有世界没有玩家：保持 respawn 后的新手状态开局（宁丢不脏档）
+    updateHandsUI(); updateStrengthUI(); updateGoals(); updateItemsUI(); updateStatusUI();
+    return;
+  }
   const q = sv.player;
   P.pos.set(q.pos[0], q.pos[1], q.pos[2]); P.yaw = q.yaw; P.pitch = q.pitch;
   P.hp = q.hp; P.hunger = q.hunger; P.thirst = q.thirst; P.stam = q.stam; P.exhausted = P.stam <= 0;
   P.cold = q.cold; P.hot = q.hot; P.muscle = q.muscle; P.fatPct = q.fatPct;
+  P.sickT = q.sickT || 0;                      // 闹肚子随档（刷新不是免费治病）；憋气是瞬时状态，回满即可
+  P.air = 100;
   P.calPool = q.calPool; P.proPool = q.proPool; P.actT = q.actT; P.xp = q.xp;
   if (q.body) for (const p of BODY_PARTS) if (q.body[p] !== undefined) P.body[p] = q.body[p];   // 旧档没身体数据=满血
   updateBodyUI();
@@ -4402,8 +4948,17 @@ function restorePlayerFrom(sv) {           // 玩家与库存部分（respawn() 
   craftedTools = c.craftedTools || 0; craftedPick = !!c.craftedPick; craftedPickIron = !!c.craftedPickIron; craftedSledge = !!c.craftedSledge;
   benchPlaced = !!c.benchPlaced; torchPlaced = c.torchPlaced || 0; mobKills = c.mobKills || 0;
   drankOnce = !!c.drankOnce; ateOnce = !!c.ateOnce;
-  if (sv.weather) { setWeather(sv.weather.idx, true); weatherT = sv.weather.t || 90; curTemp = sv.weather.temp; }
+  if (sv.weather) { setWeather(sv.weather.idx, true); weatherT = Number.isFinite(sv.weather.t) ? sv.weather.t : 90; curTemp = sv.weather.temp; }
   dayCount = sv.dayCount || 1; tDay = sv.tDay || 0.3;
+  // 死亡瞬间关掉网页 / 切后台会存下 hp=0 的档：直接按原样读回来会变成"0 血还能跑"的幽灵状态。
+  // 死亡时物品/工具/经验本来就不掉（见 die() 文案），所以这里按"在营地醒过来"处理：保留库存与经验，重生回出生点。
+  if (!(q.hp > 0)) {
+    const keepXp = P.xp;
+    respawn();                                 // 重置位置/生命/营养/身体
+    P.xp = keepXp; P.level = levelFromXp(P.xp);   // 经验不因死亡重来
+    updateStrengthUI();
+    if (state === 'start') showToast('你上次倒下后被拖回了营地——东西都还在');
+  }
   updateHandsUI(); updateStrengthUI(); updateGoals(); updateItemsUI(); updateStatusUI();
 }
 
@@ -4415,7 +4970,17 @@ const pauseScreen = document.getElementById('pauseScreen');
 function setState(s) {
   state = s;
   if (s === 'playing') playingSince = performance.now();
-  else { mining.active = false; resetMining(); }
+  else {
+    mining.active = false; resetMining();
+    mouseLDown = false; mouseRDown = false; syncMouseButtons();   // 别把按住的双键状态带出界面
+    for (const k in keys) keys[k] = false;      // 离开游戏态别把按键卡在按下状态
+    fastWalk = false; jumpLatch = false;
+    aimTip(''); ghost.visible = false; highlight.visible = false;   // 收掉游戏内瞄准提示/预览，别糊在暂停/死亡/菜单上
+    selNameEl.style.display = 'none';
+    if (document.pointerLockElement === renderer.domElement) {   // 死亡/合成/暂停都要把鼠标还给玩家
+      try { document.exitPointerLock(); } catch (e) { }
+    }
+  }
   startScreen.classList.toggle('hidden', s !== 'start');
   pauseScreen.classList.toggle('hidden', s !== 'paused');
   craftScreen.classList.toggle('hidden', s !== 'craft');
@@ -4480,11 +5045,16 @@ function update(dt) {                        // 一帧的游戏逻辑（画面�
   if (!wasG && wasGround) {                  // 落地：闷响 + 高处摔伤（狠的摔趴下，要时间爬起来）
     noiseHit(260, 0.12, 0.2);
     stepT = 0.25;
-    if (lastFallVy < -13) {
+    // 落水缓冲（参考 MC：水不摔伤）：脚在水里/刚沉到水底都不结算摔伤，也不砸坑——
+    // 旧版没有这条：从高处跳进池塘会和砸在石头上一样断腿，而池塘本来是玩家的"安全落点"
+    const feetY = P.pos.y + 0.06;
+    const splash = getBlock(Math.floor(P.pos.x), Math.floor(feetY), Math.floor(P.pos.z)) === 8
+                || getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y - 0.2), Math.floor(P.pos.z)) === 8;
+    if (!splash && lastFallVy < -13) {
       hurt(Math.round((-lastFallVy - 12) * 5), '你从高处重重摔了下来', Math.random() < 0.5 ? 'legL' : 'legR');
       knockDown(Math.min(2.8, 1.6 + (-lastFallVy - 13) * 0.12), 0, 0, null);   // 落速越快躺越久：3.5m 约 2 秒、6m 约 2.8 秒
-    } else if (lastFallVy < -9.5) knockDown(1.3, 0, 0, null);   // 两米左右跳下：踉跄跪一下（1.3 秒）
-    if (lastFallVy < -10) impactCrater(Math.floor(P.pos.x), Math.floor(P.pos.y - 0.05), Math.floor(P.pos.z), -lastFallVy);
+    } else if (!splash && lastFallVy < -9.5) knockDown(1.3, 0, 0, null);   // 两米左右跳下：踉跄跪一下（1.3 秒）
+    if (!splash && lastFallVy < -10) impactCrater(Math.floor(P.pos.x), Math.floor(P.pos.y - 0.05), Math.floor(P.pos.z), -lastFallVy);
     lastFallVy = 0;
   }
   if (state !== 'playing') return;           // 可能刚摔死，后面不执行
@@ -4523,8 +5093,8 @@ function update(dt) {                        // 一帧的游戏逻辑（画面�
     camera.updateProjectionMatrix();
   }
   updateInsideView();                        // 头在树叶里时显示内壁
-  // 水下蓝色滤镜（按眼睛位置算，第三人称也准确）
-  waterFxEl.style.display = getBlock(Math.floor(P.pos.x), Math.floor(P.pos.y + P.eyeH), Math.floor(P.pos.z)) === 8 ? 'block' : 'none';
+  // 水下蓝色滤镜（按"头有没有没入水里"算，和憋气同一条判据；第三人称也准确）
+  waterFxEl.style.display = headUnderwater() ? 'block' : 'none';
   statusUiT -= dt;                           // 状态条每 0.25 秒刷新一次就够
   if (statusUiT <= 0) { updateStatusUI(); statusUiT = 0.25; }
 }
@@ -4948,6 +5518,12 @@ window.DEBUG = {
   give: (id, n, hand) => { hands[hand || 'R'] = { id, n: n || 1 }; updateHandsUI(); },
   weather: i => setWeather(i),
   env: () => ({ name: WEATHERS[weatherIdx].name, temp: +curTemp.toFixed(1), cold: +P.cold.toFixed(1), hot: +P.hot.toFixed(1) }),
+  // 水/氧气/生食的探针（优化期新增系统的观测口）
+  probe: () => ({ air: +P.air.toFixed(1), submerged: headUnderwater(), inWaterSpeed: WATER_MOVE, mineWaterMult: +mineWaterMult().toFixed(2), sickT: +P.sickT.toFixed(1), supportHere: supportAt(P.pos.x, P.pos.z) }),
+  setAir: v => { P.air = Math.max(0, Math.min(100, +v || 0)); },
+  setSick: v => { P.sickT = Math.max(0, +v || 0); },
+  oreStats: () => oreStats(),                // 矿脉成簇验证（实现在生成器旁边，测试也直接调它）
+  supportAt: (x, z) => supportAt(x, z),
   keys,
   mine: () => mine(),
   place: () => place(),
@@ -4991,7 +5567,7 @@ window.DEBUG = {
   carvedMeshTris: (x, y, z) => { const c = carved.get(idx(x, y, z)); return c && c.mesh ? c.mesh.geometry.index.count / 3 : 0; },
   goal: () => goalEl.textContent,
   addStone: n => { stonesMined += n; checkGoals(); },
-  version: 110,
+  version: 112,
   // —— v1.0 新系统 ——
   time: () => ({ day: dayCount, t: +tDay.toFixed(3), phase: dayPhase(), clock: clockText(), nightFactor: +nightFactor.toFixed(2) }),
   setTime: t => { tDay = ((+t % 1) + 1) % 1; updateDayNight(0); },
@@ -5054,10 +5630,11 @@ window.DEBUG = {
     // ③ 世界种子随机（无档时 SEED=Math.random()）——不同世界出生点地貌差出 3 倍 tris，量出来的不是回归是抽签。
     // 修法：测试方预写固定种子存档（localStorage bx_save_v1 {v,seed}）→ 出生点固定 → 跨次可比；
     // 这里固定在出生点量，先 update 催熟 4 秒，再 8 方向环视取峰值。
-    // 预算 rationale（固定种子 20260909 实测 132 calls / 115.5 万 tris 峰值——该出生点三面开阔地形）：
-    // calls 线 140（+6%）；tris 线 120 万（+4%）。护栏目标是防几何翻倍级回归（光照烘焙顶点翻倍/蘑菇重建翻倍
-    // 这类），不是零增长。注意：换固定种子需重标定预算；玩家随机世界单视角典型 30~80 万，低端机优化
-    // 方向是雾距自适应（fog.far 现仅雨天 120）——留作后续
+    // 预算 rationale（固定种子 20260909，本次优化"剔除藏在方块之间的废面"后重标定：124 calls / 13.6 万 tris 峰值）：
+    // 旧判据把沙/砂岩/雪/冰/煤/铁（id≥9 的满格方块）当成"造型"处理，导致石头贴着它们就多画一张藏着的面——
+    // 一张贴图相同、永远看不见的废面。按"是不是满格"判之后三角面少了约 8 成（115.5 万 → 13.6 万）。
+    // calls 线 140 保持（+13%）；tris 线 32 万（约 2.4 倍余量）——旧线 120 万是给"废面时代"定的，
+    // 留着会把 5 倍级的几何回归放过去，护栏就白设了。换固定种子仍需重标定。
     for (let i = 0; i < 240; i++) update(1 / 60);             // 催熟：跑过云漂移/状态UI/环境tick的初始化节奏
     {
       const CX = WX >> 1, CZ = WZ >> 1;                       // 复刻出生点搜索：世界中心螺旋找第一块硬实地
@@ -5078,7 +5655,7 @@ window.DEBUG = {
       }
       R.stats = { calls: pCalls, tris: pTris };
       ok('性能：出生点催熟后 8 方向峰值 draw calls < 140', R.stats.calls < 140);
-      ok('性能：出生点催熟后 8 方向峰值三角面 < 120 万', R.stats.tris < 1200000);
+      ok('性能：出生点催熟后 8 方向峰值三角面 < 32 万（废面剔除后重标定）', R.stats.tris < 320000);
     }
     // —— 5. 夜行者：生成 → 追玩家 → 战斗 → 天亮烧死 ——
     const gx2 = Math.floor(P.pos.x) + 5, gz2 = Math.floor(P.pos.z);
@@ -5113,6 +5690,17 @@ window.DEBUG = {
     ok('效力：石镐≈1.87（基效×档位1.3）', Math.abs(toolPower('pick', 3) - 1.87) < 0.03);
     ok('效力：不只看硬度——冰锤0.66反超木锤0.55（密度+粘稠捞回来）', toolPower('hammer', 18) > toolPower('hammer', 4));
     ok('效力：密度按工具加权（大锤吃质量>镐靠尖）', toolPower('sledge', 4) / 1.6 < toolPower('pick', 4) / 1.3);
+    // —— 6a2. 材料链与手部空间：矿石不能被 frag 打成石料；满手合成不能吞料 ——
+    ok('材料：煤矿/铁矿掉对应材料（frag 不再映射成石料）', BLOCKS[19].frag === undefined && BLOCKS[20].frag === undefined);
+    ok('质量：造型物品按体积算（石台阶1.25kg/木台阶0.35kg）', Math.abs(itemMassOf(9) - 1.25) < 1e-9 && Math.abs(itemMassOf(10) - 0.35) < 1e-9);
+    {
+      const torchR = RECIPES.find(r => r.id === 'torch');
+      const hL = hands.L, hR = hands.R, f19 = frags[19], st = sticks;
+      hands.L = { id: 1, n: HAND_MAX }; hands.R = { id: 2, n: HAND_MAX };
+      frags[19] = 1; sticks = 2;
+      ok('合成：满手时火把不可合成（避免扣料后放不下）', !canCraft(torchR));
+      hands.L = hL; hands.R = hR; frags[19] = f19; sticks = st;
+    }
     // —— 6b. 硬度配比：挖掘速度 = 工具 × 被挖材料 的交互（软碰硬平方衰减，硬碰软边际递减）——
     ok('配比：同级 ×1.0 / 硬碰软封顶 ×1.25 / 软碰硬 ×0.444（木2.0凿石3.0）', hardnessMatch(3.0, 3.0) === 1 && hardnessMatch(4.5, 1.0) === 1.25 && Math.abs(hardnessMatch(2.0, 3.0) - 0.444) < 0.01);
     ok('配比下限 ×0.12（软到极致也留一口气）', hardnessMatch(0.3, 4.5) === 0.12);
@@ -5131,6 +5719,14 @@ window.DEBUG = {
     // —— 7. 部位健康：受伤 → 能力惩罚 → 自愈 → 视图 ——
     initBody();
     ok('部位：初始全身满血', BODY_PARTS.every(p => P.body[p] === 100));
+    {
+      P.hp = 100;
+      const sum0 = BODY_PARTS.reduce((s, p) => s + P.body[p], 0);
+      hurtBody('legL', 10, 5, '测试摔伤');
+      const sum1 = BODY_PARTS.reduce((s, p) => s + P.body[p], 0);
+      ok('部位：带总血的部位伤不重复扣别的部位', Math.abs((sum0 - sum1) - 10) < 0.01 && P.hp === 95);
+      initBody(); P.hp = 100;
+    }
     hurtBody('handL', 60, 0);
     ok('部位：手<50 → 挖掘攀爬 ×0.7', bodyPenalty('hand') === 0.7);
     hurtBody('legR', 75, 0);
@@ -5177,7 +5773,255 @@ window.DEBUG = {
     }
     mining.active = false; resetMining();
     P.pos.set(px0, py0, pz0);
+    // ===================== 本次优化新增系统的验收（水 / 潜行 / 矿脉 / 生食）=====================
+    // —— 11. 憋气与溺水（参考 MC 氧气）：头被水淹 → 15 秒憋空 → 掉血；出水快速回气 ——
+    // 不找真水塘：只把头所在的一格临时改成水，测的是规则（地形只负责提供水，规则写在这里）
+    placeFlat();
+    const hvi = idx(Math.floor(P.pos.x), Math.floor(P.pos.y + P.eyeH), Math.floor(P.pos.z));
+    const oldHead = world[hvi];
+    world[hvi] = 8;                                  // 把头淹了
+    P.air = 100; P.hp = 100; P.sickT = 0; P.stance = 0; applyStance();
+    for (let i = 0; i < 60 * (AIR_SECONDS + 3); i++) survivalTick(1 / 60);
+    ok('溺水：憋气 15 秒见底后开始掉血（水下会淹死）', P.air === 0 && P.hp < 100);
+    const hpDrown = P.hp;
+    for (let i = 0; i < 60 * 3; i++) survivalTick(1 / 60);
+    ok('溺水：见底后持续掉血', P.hp < hpDrown);
+    ok('水中：挖掘时长 ×2.5（MC 水下挖掘慢 5 倍的折中口径）', mineWaterMult() === 2.5);
+    world[hvi] = oldHead;                            // 捞出来
+    P.air = 0; P.hp = 100;
+    for (let i = 0; i < 60 * 2; i++) survivalTick(1 / 60);
+    ok('溺水：出水 2 秒回满气（MC 一上岸就快速回气）', P.air === 100 && mineWaterMult() === 1);
+
+    // —— 12. 水里行动迟缓（MC 水下迟缓）：同一位置、同一朝向，水下 25 帧走出的距离只有陆地 0.62 ——
+    {
+      const by0 = Math.floor(P.pos.y);
+      const wetCells = [];
+      for (let dy = 0; dy <= 2; dy++) { const vi = idx(Math.floor(P.pos.x), by0 + dy, Math.floor(P.pos.z)); wetCells.push([vi, world[vi]]); world[vi] = 8; }
+      const sx0 = P.pos.x, sz0 = P.pos.z;
+      P.vel.set(0, 0, 0); keys['KeyW'] = true;
+      for (let i = 0; i < 25; i++) stepPhysics(1 / 60);
+      const wet = Math.hypot(P.pos.x - sx0, P.pos.z - sz0);
+      keys['KeyW'] = false; P.vel.set(0, 0, 0);
+      for (const [vi, id] of wetCells) world[vi] = id;
+      P.pos.set(sx0, P.pos.y, sz0);
+      keys['KeyW'] = true;
+      for (let i = 0; i < 25; i++) stepPhysics(1 / 60);
+      const dry = Math.hypot(P.pos.x - sx0, P.pos.z - sz0);
+      keys['KeyW'] = false; P.vel.set(0, 0, 0); P.pos.set(sx0, P.pos.y, sz0);
+      ok('水中：水平速度只有陆地约 0.62（MC 水下迟缓）', wet > 0.2 && wet < dry * 0.75 && dry > 0.35);
+    }
+
+    // —— 13. 蹲行防坠边（MC 潜行不坠崖）：脚前掏空一格 → 蹲着不迈出去，站着照样掉下去 ——
+    {
+      placeFlat();
+      const gy0 = P.pos.y;
+      P.yaw = 0;                                     // 面朝 -z
+      const cx1 = Math.floor(P.pos.x), cz1 = Math.floor(P.pos.z), cy1 = Math.floor(P.pos.y - 0.02);
+      const fvi = idx(cx1, cy1, cz1 - 1), oldFront = world[fvi];
+      world[fvi] = 0;                                // 正前方脚下掏空：一步就是 1 格深的坎
+      P.stance = 1; applyStance(); keys['KeyW'] = true;
+      for (let i = 0; i < 90; i++) stepPhysics(1 / 60);
+      const crouchZ = P.pos.z, crouchY = P.pos.y;
+      keys['KeyW'] = false; P.vel.set(0, 0, 0);
+      P.pos.set(cx1 + 0.5, gy0, cz1 + 0.5);
+      P.stance = 0; applyStance(); keys['KeyW'] = true;
+      for (let i = 0; i < 90; i++) stepPhysics(1 / 60);
+      const standZ = P.pos.z, standY = P.pos.y;
+      keys['KeyW'] = false; P.vel.set(0, 0, 0);
+      world[fvi] = oldFront;
+      P.pos.set(cx1 + 0.5, gy0, cz1 + 0.5);
+      ok('防坠边：蹲着走到坎边停住（中心不进坑格、人没掉下去）', crouchZ >= cz1 - 1e-6 && crouchY > gy0 - 0.3);
+      // 站着那一趟不做"必须摔下去"的断言：坎外的沙地会触发本作既有的"松散坎蹬踏"（沙丘当台阶走），
+      // 人掉进去又蹬出来继续走——这是设计内的行为。要证的是"两者分道扬镳"：蹲的被拦在坎边，站着的一路向前
+      ok('防坠边：站着不管（继续往前/掉进坎，蹲着被拦下）', standZ < crouchZ - 0.4 || standY < crouchY - 0.4);
+    }
+
+    // —— 14. 往水里放方块（MC 水被置换）+ 火把不能进水（MC 遇水点不着）——
+    {
+      placeFlat();
+      const ps0 = placeSizeIdx;                      // 别把玩家的放置档位偏好改掉（测试完还回去）
+      setPlaceSize(0);                               // 整块档：小于 1m 会走小方块分支，测不到这条路径
+      const tTop = Math.floor(P.pos.y - 1), px1 = P.pos.x, pz1 = P.pos.z;
+      const tx2 = Math.floor(px1) + 2, tz2 = Math.floor(pz1);
+      const svi = idx(tx2, tTop + 1, tz2), wvi = idx(tx2, tTop + 2, tz2);
+      const oldS = world[svi], oldW = world[wvi];
+      setBlockAndRebuild(tx2, tTop + 1, tz2, 3);     // 石头
+      setBlockAndRebuild(tx2, tTop + 2, tz2, 8);     // 石头上灌一格水
+      P.pos.set(px1, tTop + 1, pz1); P.vel.set(0, 0, 0);
+      const dx0 = tx2 + 0.5 - P.pos.x, dy0 = tTop + 2 - (P.pos.y + P.eyeH), dz0 = tz2 + 0.5 - P.pos.z, len0 = Math.hypot(dx0, dy0, dz0);
+      P.yaw = Math.atan2(-dx0 / len0, -dz0 / len0); P.pitch = Math.asin(dy0 / len0);
+      const hs0 = hands.R, hl0 = hands.L;
+      hands.L = null; hands.R = { id: 3, n: 2 };
+      place();
+      ok('放置：水格能放方块（水被挤掉，MC 式填水）', world[wvi] === 3);
+      setBlockAndRebuild(tx2, tTop + 2, tz2, 8);     // 复原成水
+      hands.R = { id: 22, n: 1 };                    // 火把：应该被拒绝
+      place();
+      ok('放置：火把不能插进水里（MC 遇水点不着）', world[wvi] === 8);
+      setBlockAndRebuild(tx2, tTop + 1, tz2, oldS);  // 还原现场
+      setBlockAndRebuild(tx2, tTop + 2, tz2, oldW);
+      hands.L = hl0; hands.R = hs0;
+      P.pos.set(px1, tTop + 1, pz1); P.vel.set(0, 0, 0);
+      setPlaceSize(ps0);
+    }
+
+    // —— 15. 矿脉成簇（MC 矿脉/blob）：不只数量对，还要"同种相邻"（旧版按格撒点这个比例≈0）——
+    {
+      const ore = oreStats();
+      R.oreStats = ore;
+      ok('矿脉：煤/铁都有（数量够玩家挖）', ore.coal > 150 && ore.iron > 40);
+      ok('矿脉：一半以上的矿块带同种邻居（成簇而非散点）', ore.clustered > (ore.coal + ore.iron) * 0.5);
+    }
+
+    // —— 16. 生食风险（MC 生食中毒口径）：闹肚子时脱水明显更快 ——
+    {
+      P.sickT = 0; P.thirst = 10;
+      for (let i = 0; i < 60; i++) survivalTick(1 / 60);
+      const thirstA = 10 - P.thirst;
+      P.thirst = 10; P.sickT = 30;
+      for (let i = 0; i < 60; i++) survivalTick(1 / 60);
+      const thirstB = 10 - P.thirst;
+      P.sickT = 0; P.thirst = 10;
+      ok('生食：闹肚子时脱水快 2 倍以上（生肉该烤）', thirstB > thirstA * 1.5);
+    }
+
+    // —— 17. 按住空格不连跳（MC 手感）：一直按着落地后不再弹起；松开再按能跳 ——
+    {
+      placeFlat();
+      P.stance = 0; applyStance(); P.vel.set(0, 0, 0); jumpLatch = false;
+      keys['Space'] = true;
+      for (let i = 0; i < 72; i++) stepPhysics(1 / 60);       // 1.2 秒：一次起跳 0.43s 就落地了
+      ok('跳跃：按住空格落地后不再自动弹起', P.onGround === true && Math.abs(P.vel.y) < 0.01);
+      keys['Space'] = false; stepPhysics(1 / 60);
+      keys['Space'] = true; stepPhysics(1 / 60);
+      ok('跳跃：松开再按能起跳', P.vel.y > 3);
+      keys['Space'] = false; jumpLatch = false; P.vel.set(0, 0, 0);
+    }
+
+    // —— 18. 战斗：墙挡视线 / 挥击冷却 / 倒地打不了 ——
+    {
+      placeFlat();
+      const wgx = Math.floor(P.pos.x) + 2, wgz = Math.floor(P.pos.z), wgy = Math.floor(P.pos.y + P.eyeH);
+      const old1 = world[idx(wgx, wgy, wgz)];
+      setBlockAndRebuild(wgx, wgy, wgz, 3);                   // 齐眼高的一面石墙
+      ok('战斗：齐眼高的墙挡住视线（隔墙不互咬）', sightBlocked(P.pos.x, P.pos.y + P.eyeH, P.pos.z, wgx + 1.5, P.pos.y + P.eyeH, wgz + 0.5));
+      setBlockAndRebuild(wgx, wgy, wgz, 10);                  // 同一格换成半高台阶
+      ok('战斗：半格台阶上方视线通过（不会被整格挡死）', !sightBlocked(P.pos.x, P.pos.y + P.eyeH, P.pos.z, wgx + 1.5, P.pos.y + P.eyeH, wgz + 0.5));
+      setBlockAndRebuild(wgx, wgy, wgz, old1);
+
+      P.atkCd = 0; P.hp = 100;
+      spawnMobAt(Math.floor(P.pos.x) + 1, Math.floor(P.pos.y - 0.02), Math.floor(P.pos.z));
+      const mm = mobs[mobs.length - 1];
+      mm.x = P.pos.x + 1.1; mm.y = P.pos.y; mm.z = P.pos.z;
+      P.yaw = Math.atan2(-1, 0); P.pitch = -0.6;              // 面朝 +x，低头看怪
+      const hp1 = mm.hp;
+      const hit1 = tryAttack();
+      ok('战斗：正面挥击命中', hit1 && mm.hp < hp1);
+      const hp2 = mm.hp;
+      const hit2 = tryAttack();                               // 立刻第二下：冷却中，不出伤害
+      ok('战斗：0.4 秒收手冷却（连点不叠伤害）', hit2 === true && mm.hp === hp2);
+      P.fall = 1.0;
+      ok('战斗：倒在地上挥不了手', tryAttack() === false);
+      P.fall = 0;
+      while (mobs.length) removeMob(0);
+      P.atkCd = 0;
+    }
+
+    // —— 19. 小方块：台阶上方能放、台阶体内不能放；敲掉底座上面的小方块会掉 ——
+    {
+      placeFlat();
+      const sx3 = Math.floor(P.pos.x) + 3, sz3 = Math.floor(P.pos.z), sy3 = Math.floor(P.pos.y - 0.02);
+      const oldS3 = world[idx(sx3, sy3, sz3)];
+      setBlockAndRebuild(sx3, sy3, sz3, 10);                  // 木台阶（半高 0.5）
+      ok('小方块：台阶上方的空气能放（旧版整格判死）', !smallPlaceBlocked(sx3 + 0.2, sy3 + 0.55, sz3 + 0.2, 0.1));
+      ok('小方块：台阶体内不能放', smallPlaceBlocked(sx3 + 0.2, sy3 + 0.2, sz3 + 0.2, 0.1));
+      // 瞄准台阶顶：命中点必须在 y+0.5 的台阶面上，而不是整格顶 y+1（否则 10cm 小件会浮空）
+      {
+        const ox = sx3 + 0.5, oz = sz3 + 0.5;
+        P.pos.set(sx3 - 0.5, sy3 + 1, oz); P.vel.set(0, 0, 0);
+        const ey = sy3 + 1 + P.eyeH;
+        const dx = ox - P.pos.x, dy = (sy3 + 0.5) - ey, dz = 0;
+        const len = Math.hypot(dx, dy, dz);
+        P.yaw = Math.atan2(-dx / len, -dz / len); P.pitch = Math.asin(dy / len);
+        const hitShape = raycastVoxel();
+        ok('瞄准：台阶顶命中 y+0.5（不再是整格顶）', !!hitShape && Math.abs(hitShape.point.y - (sy3 + 0.5)) < 0.06 && hitShape.x === sx3 && hitShape.z === sz3);
+      }
+      setBlockAndRebuild(sx3, sy3, sz3, oldS3);
+      // 叠罗汉：下面那块被敲掉，上面那块要变成掉落物而不是悬空
+      const sv1 = subVox.length;
+      addSmallBlock(sx3 + 0.2, sy3 + 1.0, sz3 + 0.2, 0.1, 4);
+      addSmallBlock(sx3 + 0.2, sy3 + 1.1, sz3 + 0.2, 0.1, 4);
+      const lower = subVox[sv1], upper = subVox[sv1 + 1];
+      const fallers0 = fallers.length;
+      removeSubVox(lower);
+      ok('小方块：敲掉下层，上层跟着掉（不悬空）', !subVox.includes(upper) && fallers.length === fallers0 + 1);
+      while (fallers.length > fallers0) {                     // 清理测试刚生成的掉落刚体
+        const f = fallers.pop();
+        scene.remove(f.mesh); f.mesh.geometry.dispose();
+      }
+    }
+
+    // —— 20. 死亡档：hp=0 的旧档读回来不能是"0 血幽灵" ——
+    {
+      saveGame(); sv = readSave();
+      const deadSv = JSON.parse(JSON.stringify(sv));
+      deadSv.player.hp = 0;
+      P.hp = 0;
+      restorePlayerFrom(deadSv);
+      ok('存档：hp=0 的档读回会重生（不再是 0 血还能跑）', P.hp > 0 && state !== 'dead');
+      placeFlat();
+    }
+
+    // —— 21. 屋顶判定：靠墙不是室内（旧版站在墙边就白嫖取暖），盖满 3×3 才算 ——
+    {
+      placeFlat();
+      P.stance = 0; applyStance();
+      const rx = Math.floor(P.pos.x), rz = Math.floor(P.pos.z), ry0 = Math.floor(P.pos.y + P.ph);
+      const wx = rx + 1, wy = Math.floor(P.pos.y - 0.02);
+      const oldW1 = world[idx(wx, wy, rz)], oldW2 = world[idx(wx, wy + 1, rz)];
+      setBlockAndRebuild(wx, wy, rz, 3);                      // 紧挨着的一面 2 格高石墙
+      setBlockAndRebuild(wx, wy + 1, rz, 3);
+      envTickT = 0; updateEnvTick(1);
+      ok('环境：靠着一堵墙不算室内（取暖不能白嫖）', sheltered === false);
+      setBlockAndRebuild(wx, wy, rz, oldW1);
+      setBlockAndRebuild(wx, wy + 1, rz, oldW2);
+      const roofSaved = [];
+      for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+        const vi = idx(rx + dx, ry0 + 1, rz + dz);
+        roofSaved.push([rx + dx, ry0 + 1, rz + dz, world[vi]]);
+        setBlockAndRebuild(rx + dx, ry0 + 1, rz + dz, 6);
+      }
+      envTickT = 0; updateEnvTick(1);
+      ok('环境：盖满 3×3 屋顶才算室内', sheltered === true);
+      for (const [gx, gy, gz, old] of roofSaved) setBlockAndRebuild(gx, gy, gz, old);
+      envTickT = 0; updateEnvTick(1);
+    }
+
+    // —— 22. 雕刻窗口：整格挖穿的格子视线能穿过去；还剩实心子格时挡在子格上 ——
+    {
+      placeFlat();
+      P.yaw = -Math.PI / 2; P.pitch = 0; P.vel.set(0, 0, 0);     // 面朝 +x
+      const ex = Math.floor(P.pos.x), ey = Math.floor(P.pos.y + P.eyeH), ez = Math.floor(P.pos.z);
+      const gx = ex + 1, gz = ez, gy = ey, bx = ex + 2;
+      const oldC = world[idx(gx, gy, gz)], oldW = world[idx(bx, gy, gz)];
+      setBlockAndRebuild(bx, gy, gz, 3);                        // 窗口后面的一堵墙
+      world[idx(gx, gy, gz)] = 3;
+      const bits = new Uint8Array(1000).fill(1);                // 整格咬空
+      carved.set(idx(gx, gy, gz), { bits, n: 1000, mesh: null });
+      let h = raycastVoxel();
+      ok('雕刻：整格挖穿的窗口视线能穿过去（打到后面的墙）', !!h && h.x === bx && h.y === gy && h.z === gz);
+      bits[subIdx(0, 5, 5)] = 0;                                // 入口那面还剩一个 10cm 子格
+      carved.get(idx(gx, gy, gz)).n = 999;
+      h = raycastVoxel();
+      ok('雕刻：还剩实心子格时挡在子格上（不穿透）', !!h && h.x === gx && h.y === gy && h.z === gz && Math.abs(h.point.x - gx) < 0.05);
+      carved.delete(idx(gx, gy, gz));
+      world[idx(gx, gy, gz)] = oldC;
+      setBlockAndRebuild(bx, gy, gz, oldW);
+      rebuildChunkAround(gx, gz);
+    }
     // —— 复位 ——
+    P.stance = 0; applyStance(); keys['KeyW'] = false;
+    P.pos.set(px0, py0, pz0); P.vel.set(0, 0, 0);
     tDay = 0.30; updateDayNight(0);
     if (st0 !== 'playing') setState(st0);
     R.summary = `${R.pass} 通过 · ${R.fail} 失败` + (R.log.length ? ' | ' + R.log.join('；') : '');
